@@ -19,6 +19,5 @@ source ./backends/main.sh
 # Main loop
 # ------------------------------------------------------------------------------
 
-initialize_logger
 log_info "Starting Expression Wallpaper Manager"
 initialize_backend

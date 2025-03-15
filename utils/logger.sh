@@ -1,8 +1,3 @@
-initialize_logger() {
-  LOG_LEVEL="${LOG_LEVEL:-INFO}"
-  LOG_TO_CONSOLE="${LOG_TO_CONSOLE:-false}"
-}
-
 log_message() {
   local -A levels=(["DEBUG"]=0 ["INFO"]=1 ["WARNING"]=2 ["ERROR"]=3)
   local level="${1}"
@@ -17,7 +12,7 @@ log_message() {
 
   # Filter logs based on $LOG_LEVEL
   if ((level_num >= current_level_num)); then
-    if [[ "$LOG_TO_CONSOLE" == "true" ]]; then
+    if [[ "${LOG_TO_CONSOLE:-false}" == "true" ]]; then
       local -A colors=(
         ["DEBUG"]="\033[36m"   # Cyan
         ["INFO"]="\033[32m"    # Green
