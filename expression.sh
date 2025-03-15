@@ -13,6 +13,7 @@ cd "$SCRIPT_DIR"
 
 source ./config.conf
 source ./utils/logger.sh
+source ./backends/main.sh
 
 # ------------------------------------------------------------------------------
 # Main loop
@@ -20,3 +21,4 @@ source ./utils/logger.sh
 
 initialize_logger
 log_info "Starting Expression Wallpaper Manager"
+initialize_backend
