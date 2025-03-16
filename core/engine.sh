@@ -3,9 +3,20 @@ select_wallpaper() {
 
   local hour=$(echo "$current_time" | cut -d':' -f1)
 
+  # SPECIAL WALLPAPERS
+  local special_name="T_${hour}00"
+  local special_value="${!special_name}"
+  if [[ -n "$special_value" ]]; then # Ensure variable exists
+    local special_wallpaper="$SPECIAL_DIR/$special_value.jpg"
+    if [[ -e "$special_wallpaper" ]]; then
+      echo "$special_wallpaper"
+      return
+    fi
+  fi
+
   selected_wallpaper="$WALLPAPER_DIR/$hour.jpg"
 
-  # Randomization
+  # RANDOMIZED WALLPAPERS
   if [[ "$ENABLE_RANDOMIZATION" == "true" ]]; then
     case "$RANDOMIZATION_SCOPE" in
     "current")
@@ -25,7 +36,7 @@ select_wallpaper() {
     esac
   fi
 
-  # Wallpaper validation
+  # WALLPAPER VALIDATION
   if [[ ! -f "$selected_wallpaper" ]]; then
 
     if [[ -f "$WALLPAPER_DIR/$hour.jpg" ]]; then

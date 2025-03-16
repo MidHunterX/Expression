@@ -19,7 +19,7 @@ log_message() {
         ["WARNING"]="\033[33m" # Yellow
         ["ERROR"]="\033[31m"   # Red
       )
-      echo -e "${colors[$level]}[$level] $message\033[0m"
+      echo -e "${colors[$level]}[$level]\033[0m $message"
     fi
   fi
 }

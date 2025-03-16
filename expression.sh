@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Strict mode
-set -euo pipefail
-
 # ------------------------------------------------------------------------------
 # Constants and initialization
 # ------------------------------------------------------------------------------
@@ -46,7 +43,7 @@ initialize_backend
   # REFRESH_INTERVAL = 24/n(images)*60 if spaceout
   # REFRESH_INTERVAL = {user_input} if random
 
-  next_update_time=$(calculate_next_update_time "$current_time" "${REFRESH_INTERVAL:-60}")
+  next_update_time=$(calculate_next_update_time "$current_time" "${NEXT_UPDATE_INTERVAL:-60}")
   log_info "Next update time: $next_update_time"
 
   wallpaper_path=$(select_wallpaper "$current_time")
