@@ -1,56 +1,98 @@
 # Expression
 
-## Requirements
+Express vibes with wallpapers
 
-- [ ] 1. Change wallpapers with any backends. Like swww, feh etc.
-- [ ] 2. 24 hour wallpaper cycling. Dedicated wallpaper for each hour.
-- [ ] 3. Higher priority special wallpapers which overrides normal cycle.
-- [ ] 4. Collections
-- [ ] 5. Collection Flow control
-- [ ] 6. Interface for other process to change wallpaper programmatically (IPC)
-- [ ] 7. Sub collections - optional set of wallpapers for each hour
-- [ ] 8. Custom script execution support - for notification, pywal etc.
-- [ ] 9. Random wallpapers
-- [ ] 10. Per collection config
+## Project Requirements
 
-- [ ] Debug Logging
-- [ ] Detailed Testing
+### Core Features
 
-### Though process
+- [ ] 1. Multi-backend support (swww, feh, etc.)
+- [ ] 2. 24-hour wallpaper cycling with dedicated wallpaper for each hour
+- [ ] 3. Priority-based wallpaper overrides
+- [ ] 4. Collection management for organizing wallpapers by theme
+- [ ] 5. Collection flow control (time-based collection switching)
+- [ ] 6. IPC interface for programmatic wallpaper control
+- [ ] 7. Sub-collections for optional wallpaper sets within each hour
+- [ ] 8. Custom script execution support (notifications, pywal integration, etc.)
+- [ ] 9. Randomization with configurable scopes
+- [ ] 10. Per-collection configuration
+- [ ] 11. Time recalibration for system hibernation/sleep recovery
+- [ ] 12. Comprehensive logging system
+- [ ] 13. Extensive test coverage
 
-Requirement 3 & 4: High priority wallpapers and collections
+## Design Considerations
 
-- Currently this feature is being implemented via setting env variables in format `T_HHMM`.
-- Then checking if that variable is set else follow lower priority (24 hour cycling)
-- A better way would be setting high priority dir (override) and low priority dir (24 hour cycle).
-- Maybe even scale it to multiple low priority dirs (collections).
-- Collections can be a collection of wallpapers for different vibes (gaming, work, dark_mode, nsfw etc).
+### Priority and Collections
 
-Requirement 5: Collection Flow Control
+The system will implement a hierarchical approach to wallpaper selection:
 
-- Seeing different collections, it would be nice to set different collections at different time of the day.
-- Like light wallpapers during the day and dark wallpapers during the night.
+1. **Collections**: Logical groups of wallpapers sharing a common theme (work, gaming, dark mode, etc.)
+2. **Priority Levels**:
+   - High-priority override directories
+   - Standard 24-hour cycle directories
+   - Default fallback wallpapers
+3. **Collection Flow**: Automatic switching between collections based on time of day
+   - Example: Light wallpapers during day, dark wallpapers at night
 
-Requirement 9: Random Wallpapers
+### Randomization
 
-- Randomization with different scopes like all, subcollection etc.
-- Randomization config for each collection
+Wallpaper randomization will be implemented with configurable scopes:
 
-## Implementation
+- Within a specific hour's sub-collection
+- Across an entire collection
+- Across all available wallpapers
 
-### Requirement 1: Switchable Backends
+### Time Management
 
-- Each backend entry needs to have a standardized io format.
-- Provide function for:
-  - Initializing backend - checking if available and setting up.
-  - Setting wallpaper
-  - additional arguments
+The system will handle time-related challenges:
 
-### Requirement 7: Sub Collections
+- Recalibration after system sleep/hibernation
+- Scheduling next wallpaper change
+- Time-based collection transitions
 
-- Add an optional dir with the name of hour to enable random wallpaper feature for that hour.
-- Sub collection feature can be used on both high and low priority dirs.
+## Implementation Strategy
 
-## Behaviors
+### Backend Architecture
 
-- If backend is not set up, this script will initialize it for you and run rest of the script anyway.
+- Standardized backend interface with consistent I/O format
+- Each backend implementation must provide:
+  - Initialization function (availability check, setup)
+  - Wallpaper application function
+  - Configuration options
+
+### Sub-collection Structure
+
+- Directory-based organization following the pattern:
+  ```
+  collection/
+  ├── 00.jpg        # Standard wallpaper for midnight (00:00)
+  ├── 00/           # Sub-collection for midnight
+  │   ├── E.jpg     # Alternative wallpapers
+  │   ├── Zucc.jpg  # for midnight hour
+  │   └── ...
+  ├── 01.jpg        # Standard wallpaper for 1:00
+  └── ...
+  ```
+- Sub-collections can be used in both standard and high-priority directories
+
+### Collection Flow
+
+- Out of scope. This can be achieved via cli commands to switch between collections.
+
+### Configuration System
+
+- Hierarchical configuration:
+  - System-wide defaults
+  - Per-collection settings
+  - Time-specific overrides
+- Support for external script integration
+- Backend-specific parameters
+
+### IPC Interface
+
+- Socket-based communication protocol
+- Command API for:
+  - Immediate wallpaper changes
+  - Collection switching
+  - Configuration updates
+  - Status queries
