@@ -47,15 +47,7 @@ apply_wallpaper() {
   fi
 
   log_debug "Applying wallpaper with SWWW: $wallpaper_path"
-  local cmd="swww img \"$wallpaper_path\""
-
-  if [[ "$ENABLE_TRANSITIONS" == "true" ]]; then
-    cmd="$cmd --transition-type $TRANSITION_TYPE --transition-duration $TRANSITION_DURATION"
-  fi
-
-  if [[ -n "$SWWW_FILTER" ]]; then
-    cmd="$cmd --filter $SWWW_FILTER"
-  fi
+  local cmd="swww img $wallpaper_path -t center"
 
   eval "$cmd"
 
