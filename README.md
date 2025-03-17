@@ -50,6 +50,24 @@ The system will handle time-related challenges:
 - Scheduling next wallpaper change
 - Time-based collection transitions
 
+## Dataflow
+
+Initialization -> Decision -> Execution -> Waiting
+
+### Initialization
+
+- Load system configuration
+- Initialize logging system
+- Initialize backend interface
+
+### Decision
+
+- If special collection is active, use it
+- Else If time-based collection is active, use it
+  - If sub-collection is available, use it
+  - Else use default collection
+- Else skip
+
 ## Implementation Strategy
 
 ### Backend Architecture
@@ -59,6 +77,31 @@ The system will handle time-related challenges:
   - Initialization function (availability check, setup)
   - Wallpaper application function
   - Configuration options
+  - Supported extensions
+
+### Wallpaper Application Algorithms
+
+- 24-hour cycle: Fixed time based on filename
+- Spread out (ordered | random): n/m (n = number of wallpapers, m = number of hours)
+
+### Waiting Recalculation Strategy (Scheduling)
+
+Accuracy: 1  # seconds
+- (T x 60) / 2
+- 4hr: T/2 - 2hr
+- 2hr: T/2 - 1hr
+- 1hr: T/2 - 30min
+- 30min: T/2 - 15min
+- 15min: T/2 - 7.5min
+- 7.5min: T/2 - 3.75min
+- 3.75min: T/2 - 1.875min
+- 1.875min: T/2 - 0.9375min
+- Accuracy <= 1 - skip
+- ~0.9375min: T/2 - 0.46875min~
+- ~0.46875min: T/2 - 0.234375min~
+- ~0.234375min: T/2 - 0.1171875min~
+- ~0.1171875min: T/2 - 0.05859375min~
+- ~0.05859375min: T/2 - 0.029296875min~
 
 ### Sub-collection Structure
 
