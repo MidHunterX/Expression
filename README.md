@@ -86,7 +86,8 @@ Initialization -> Decision -> Execution -> Waiting
 
 ### Waiting Recalculation Strategy (Scheduling)
 
-Accuracy: 1  # seconds
+Accuracy: 1 # seconds
+
 - (T x 60) / 2
 - 4hr: T/2 - 2hr
 - 2hr: T/2 - 1hr
@@ -107,20 +108,41 @@ Accuracy: 1  # seconds
 
 - Directory-based organization following the pattern:
   ```
-  collection/
-  ├── 00.jpg        # Standard wallpaper for midnight (00:00)
-  ├── 00/           # Sub-collection for midnight
+  wallpaper_dir/
+  ├── 0000.jpg      # Standard wallpaper for midnight (00:00)
+  ├── 0500.jpg      # Standard wallpaper for 5:00
+  ├── 2100.jpg      # Standard wallpaper for 21:00
+  ├── 2100/         # Sub-collection for 21:00
   │   ├── E.jpg     # Alternative wallpapers
   │   ├── Zucc.jpg  # for midnight hour
   │   └── ...
-  ├── 01.jpg        # Standard wallpaper for 1:00
+  ├── 2200.jpg      # Standard wallpaper for 1:00
+  └── ...
+  ```
+  - Follow this pattern for multiple collections:
+  ```
+  wallpaper_dir/
+  │   special/          # High-priority override directory
+  │   └── 0500.jpg      # Wallpaper override for 5:00
+  │   collection1/      # Standard wallpaper collection
+  │   └── ...
+  │   collection2/
+  │   ├── 0000.jpg      # Standard wallpaper for midnight (00:00)
+  │   ├── 0000/         # Sub-collection for midnight
+  │   │   ├── E.jpg     # Alternative wallpapers
+  │   │   ├── Zucc.jpg  # for midnight hour
+  │   │   └── ...
+  │   ├── 0100.jpg      # Standard wallpaper for 1:00
+  │   └── ...
   └── ...
   ```
 - Sub-collections can be used in both standard and high-priority directories
+- Dir names with `HHMM` format are treated as sub-collections
+- Dir names with any other format are treated as collections
 
 ### Collection Flow
 
-- Out of scope. This can be achieved via cli commands to switch between collections.
+- This can be achieved via cli commands to switch between collections.
 
 ### Configuration System
 
@@ -139,3 +161,22 @@ Accuracy: 1  # seconds
   - Collection switching
   - Configuration updates
   - Status queries
+
+## Configuration
+
+```yaml
+general:
+  backend: swww # swww, feh, etc.
+
+directories:
+  wallpaper: /path/to/wallpapers
+  special: /path/to/special/ # Custom special location. Default is same as wallpaper
+  collections: /path/to/collections/ # Custom collection location. Default is same as wallpaper
+
+collections:
+  default: collection1 # Initial collection. Default is first collection if exists.
+
+sub-collections:
+  enabled: true
+  scope: hour # hour, collection, all
+```
