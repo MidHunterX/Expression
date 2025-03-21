@@ -34,7 +34,8 @@ impl Backend for SwwwBackend {
 
     fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>> {
         let status = Command::new("swww")
-            .args(["img", wallpaper_path, "-t", "center"])
+            // TODO: Make args configurable and remove hardcoded values
+            .args(["img", wallpaper_path, "-t", "fade"])
             .status()
             .map_err(|_| ("Failed to execute swww"))?;
         if status.success() {
@@ -44,7 +45,9 @@ impl Backend for SwwwBackend {
         }
     }
 
-    fn supported_extensions(&self) -> Vec<&'static str> {
-        vec!["jpg", "jpeg", "png", "gif", "webp", "bmp", "pnm", "tga", "tiff"]
+    // NOTE: Vec<&'static str> would be a great fit for modifying list on runtime (push(), remove()).
+    // using &[&str] (Static Slice of String) instead since it avoids heap allocation.
+    fn supported_extensions(&self) -> &[&str] {
+        return &["jpg", "jpeg", "png", "gif", "webp", "bmp", "pnm", "tga", "tiff"]
     }
 }

@@ -5,7 +5,7 @@ use std::error::Error;
 pub trait Backend {
     fn initialize(&self) -> Result<(), Box<dyn Error>>;
     fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>>;
-    fn supported_extensions(&self) -> Vec<&'static str>;
+    fn supported_extensions(&self) -> &[&str];
 }
 
 mod swww;
@@ -18,6 +18,6 @@ pub fn get_backend(name: &str) -> Result<Box<dyn Backend>, Box<dyn Error>> {
     match name {
         "swww" => Ok(Box::new(SwwwBackend::new())),
         "feh" => Ok(Box::new(FehBackend::new())),
-        _ => Err("Unknown backend".into()),
+        _ => Err(format!("Unknown backend \"{}\"", name).into()),
     }
 }

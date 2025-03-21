@@ -38,7 +38,7 @@ impl Backend for FehBackend {
         }
     }
 
-    fn supported_extensions(&self) -> Vec<&'static str> {
-        vec!["jpg", "png", "jpeg", "webp", "bmp"]
+    fn supported_extensions(&self) -> &[&str] {
+        return &["jpg", "png", "jpeg", "webp", "bmp"]
     }
 }
