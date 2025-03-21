@@ -56,8 +56,17 @@ fn main() {
         std::process::exit(1);
     }
 
-    let selected_wallpaper: &str = &wallpapers[random_range(..wallpapers.len())];
-    println!("LOG: Selected wallpaper: {}", selected_wallpaper);
+    let wallpaper_index = random_range(0..wallpapers.len());
+    let selected_wallpaper: &str = &wallpapers[wallpaper_index];
+
+    // TEST: Print selected wallpaper
+    println!(
+        "LOG: [{}/{}] {}",
+        wallpaper_index,
+        wallpapers.len(),
+        // .unwrap() is safe here because script stops if dir is empty
+        selected_wallpaper.split('/').last().unwrap().to_string()
+    );
 
     backend
         .apply_wallpaper(selected_wallpaper)
