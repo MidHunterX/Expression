@@ -5,27 +5,46 @@ use std::fs;
 
 fn main() {
     let backend_name = "swww";
-    let backend = get_backend(backend_name).expect("Failed to get backend");
 
-    backend.initialize().expect("Failed to initialize backend");
+    let backend = match get_backend(backend_name) {
+        Ok(b) => b,
+        Err(e) => {
+            println!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    match backend.initialize() {
+        Ok(b) => b,
+        Err(e) => {
+            println!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
 
     let wallpaper_dir = "/home/midhunter/Mid_Hunter/customization/wallpaper/";
-    let mut wallpapers: Vec<String> = Vec::new();
 
-    match fs::read_dir(wallpaper_dir) {
-        Ok(entries) => {
-            let entries: Vec<_> = entries.map(|f| f.unwrap().path()).collect();
-            for entry in entries {
-                if entry.is_file() {
-                    let path = entry.display().to_string();
-                    wallpapers.push(path);
-                }
-            }
+    let entries = match fs::read_dir(wallpaper_dir) {
+        Ok(e) => e,
+        Err(e) => {
+            println!("Error reading directory: {}", e);
+            std::process::exit(1);
         }
-        Err(e) => println!("Error: {}", e),
+    };
+
+    let wallpapers: Vec<String> = entries
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_file())
+        .map(|path| path.display().to_string())
+        .collect();
+
+    if wallpapers.is_empty() {
+        println!("Error: No wallpapers found in {}", wallpaper_dir);
+        std::process::exit(1);
     }
 
-    let selected_wallpaper = &wallpapers[random_range(..wallpapers.len())];
+    let selected_wallpaper: &str = &wallpapers[random_range(..wallpapers.len())];
 
     backend
         .apply_wallpaper(selected_wallpaper)
