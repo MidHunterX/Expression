@@ -4,6 +4,7 @@ use rand::random_range;
 use std::fs;
 
 fn main() {
+    // TODO: Read backend from a config file
     let backend_name = "swww";
 
     let backend = match get_backend(backend_name) {
@@ -22,7 +23,9 @@ fn main() {
         }
     };
 
-    let wallpaper_dir = "/home/midhunter/Mid_Hunter/customization/wallpaper/";
+    // TODO: Read wallpapers from a config file
+    let wallpaper_dir = "/windows/Customization/Wallpaper/";
+    // let wallpaper_dir = "/home/midhunter/Mid_Hunter/customization/wallpaper/24h_vibe/";
 
     let entries = match fs::read_dir(wallpaper_dir) {
         Ok(e) => e,
@@ -32,10 +35,19 @@ fn main() {
         }
     };
 
+    // TEST: Filter by supported extensions
+    let supported_extensions = backend.supported_extensions();
     let wallpapers: Vec<String> = entries
         .filter_map(Result::ok)
         .map(|entry| entry.path())
-        .filter(|path| path.is_file())
+        .filter(|path| {
+            path.is_file()
+                && path
+                    .extension()
+                    .and_then(|ext| ext.to_str())
+                    .map(|ext| supported_extensions.contains(&ext))
+                    .unwrap_or(false)
+        })
         .map(|path| path.display().to_string())
         .collect();
 
@@ -45,6 +57,7 @@ fn main() {
     }
 
     let selected_wallpaper: &str = &wallpapers[random_range(..wallpapers.len())];
+    println!("LOG: Selected wallpaper: {}", selected_wallpaper);
 
     backend
         .apply_wallpaper(selected_wallpaper)

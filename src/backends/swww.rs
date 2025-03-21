@@ -37,11 +37,14 @@ impl Backend for SwwwBackend {
             .args(["img", wallpaper_path, "-t", "center"])
             .status()
             .map_err(|_| ("Failed to execute swww"))?;
-
         if status.success() {
             Ok(())
         } else {
             Err(("Failed to apply wallpaper with swww").into())
         }
+    }
+
+    fn supported_extensions(&self) -> Vec<&'static str> {
+        vec!["jpg", "jpeg", "png", "gif", "webp", "bmp", "pnm", "tga", "tiff"]
     }
 }

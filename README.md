@@ -6,7 +6,7 @@ Express vibes with wallpapers
 
 ### Core Features
 
-- [ ] 1. Multi-backend support (swww, feh, etc.)
+- [x] 1. Multi-backend support (swww, feh, etc.)
 - [ ] 2. 24-hour wallpaper cycling with dedicated wallpaper for each hour
 - [ ] 3. Priority-based wallpaper overrides
 - [ ] 4. Collection management for organizing wallpapers by theme
@@ -17,8 +17,6 @@ Express vibes with wallpapers
 - [ ] 9. Randomization with configurable scopes
 - [ ] 10. Per-collection configuration
 - [ ] 11. Time recalibration for system hibernation/sleep recovery
-- [ ] 12. Comprehensive logging system
-- [ ] 13. Extensive test coverage
 
 ## Design Considerations
 

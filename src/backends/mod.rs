@@ -5,6 +5,7 @@ use std::error::Error;
 pub trait Backend {
     fn initialize(&self) -> Result<(), Box<dyn Error>>;
     fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>>;
+    fn supported_extensions(&self) -> Vec<&'static str>;
 }
 
 mod swww;

@@ -31,11 +31,14 @@ impl Backend for FehBackend {
             .args(["--bg-center", wallpaper_path])
             .status()
             .map_err(|_| ("Failed to execute feh"))?;
-
         if status.success() {
             Ok(())
         } else {
             Err(("Failed to apply wallpaper with feh").into())
         }
+    }
+
+    fn supported_extensions(&self) -> Vec<&'static str> {
+        vec!["jpg", "png", "jpeg", "webp", "bmp"]
     }
 }
