@@ -1,4 +1,5 @@
-use super::{Backend, BackendError};
+use super::Backend;
+use std::error::Error;
 use std::process::Command;
 
 pub struct FehBackend;
@@ -18,23 +19,23 @@ impl FehBackend {
 }
 
 impl Backend for FehBackend {
-    fn initialize(&self) -> Result<(), BackendError> {
+    fn initialize(&self) -> Result<(), Box<dyn Error>> {
         if !Self::is_available() {
-            return Err(BackendError::new("feh is not installed"))
+            return Err(("feh is not installed").into());
         }
         Ok(())
     }
 
-    fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), BackendError> {
+    fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>> {
         let status = Command::new("feh")
             .args(["--bg-center", wallpaper_path])
             .status()
-            .map_err(|_| BackendError::new("Failed to execute feh"))?;
+            .map_err(|_| ("Failed to execute feh"))?;
 
         if status.success() {
             Ok(())
         } else {
-            Err(BackendError::new("Failed to apply wallpaper with feh"))
+            Err(("Failed to apply wallpaper with feh").into())
         }
     }
 }
