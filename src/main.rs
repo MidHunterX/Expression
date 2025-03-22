@@ -1,47 +1,19 @@
 mod backends;
 use backends::get_backend;
 use config::Config;
-use expression::{config, utils::wallpaper::get_wallpapers};
-use rand::random_range;
+use expression::{config, utils::wallpaper};
 
-fn main() {
-    let config = Config::load().unwrap_or_else(|e| {
-        eprintln!("Failed to load config: {}", e);
-        std::process::exit(1);
-    });
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::load()?;
 
-    let backend_name = &config.general.backend;
-    let wallpaper_dir = &config.directories.wallpaper;
+    let backend = get_backend(&config.general.backend)?;
+    backend.initialize()?;
 
-    let backend = match get_backend(backend_name) {
-        Ok(b) => b,
-        Err(e) => {
-            println!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
-    match backend.initialize() {
-        Ok(b) => b,
-        Err(e) => {
-            println!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
-    // Wallpaper List
     let extensions = backend.supported_extensions();
-    let wallpapers = match get_wallpapers(wallpaper_dir, &extensions) {
-        Ok(w) => w,
-        Err(e) => {
-            println!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
+    let wallpapers = wallpaper::get_wallpapers(&config.directories.wallpaper, &extensions)?;
 
     if wallpapers.is_empty() {
-        println!("Error: No wallpapers found in {}", wallpaper_dir);
-        std::process::exit(1);
+        return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
     }
 
     // TODO: Wallpaper Sourcing Strategies
@@ -56,7 +28,7 @@ fn main() {
     // Spaced Out Time Strategy
 
     // Random Wallpaper
-    let wallpaper_index = random_range(0..wallpapers.len());
+    let wallpaper_index = rand::random_range(0..wallpapers.len());
     let selected_wallpaper = &wallpapers[wallpaper_index];
 
     // TEST: Print selected wallpaper
@@ -69,7 +41,6 @@ fn main() {
         selected_wallpaper.split('/').last().unwrap().to_string()
     );
 
-    backend
-        .apply_wallpaper(selected_wallpaper)
-        .expect("Failed to apply wallpaper");
+    backend.apply_wallpaper(selected_wallpaper)?;
+    Ok(())
 }

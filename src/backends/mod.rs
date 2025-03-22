@@ -10,7 +10,7 @@ pub fn get_backend(name: &str) -> Result<Box<dyn Backend>, Box<dyn Error>> {
     match name {
         "swww" => Ok(Box::new(SwwwBackend::new())),
         "feh" => Ok(Box::new(FehBackend::new())),
-        _ => Err(format!("Unknown backend \"{}\"", name).into()),
+        _ => Err(format!("Unknown backend {}", name).into()),
     }
 }
 
