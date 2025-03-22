@@ -37,6 +37,16 @@ cargo test
 - [ ] 9. Randomization with configurable scopes
 - [ ] 10. Per-collection configuration
 - [ ] 11. Time recalibration for system hibernation/sleep recovery
+- [ ] 12. Wallpaper Sourcing Strategies
+  - [ ] 12.1. Special Collection Strategy
+  - [ ] 12.2. Time-based Collection Strategy
+  - [ ] 12.3. Theme-based Collection Strategy
+  - [ ] 12.4. Root Strategy (Wallpaper Dir)
+  - [ ] 12.5. Randomized Scope Strategy
+- [ ] 13. Wallpaper Application Algorithms
+  - [ ] 13.1. 24-hour cycle: Fixed time based on filename
+  - [ ] 13.2. Spread out (ordered | random): n/m (n = number of wallpapers, m = number of hours)
+  - [ ] 13.3. Randomized Scope (Within Collection)
 
 ## Design Considerations
 

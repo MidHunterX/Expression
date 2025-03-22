@@ -9,13 +9,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = get_backend(&config.general.backend)?;
     backend.initialize()?;
 
-    let extensions = backend.supported_extensions();
-    let wallpapers = wallpaper::get_wallpapers(&config.directories.wallpaper, &extensions)?;
-
-    if wallpapers.is_empty() {
-        return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
-    }
-
     // TODO: Wallpaper Sourcing Strategies
     // Special Collection Strategy
     // Fixed Time Collection Strategy
@@ -23,11 +16,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Root Strategy (Wallpaper Dir)
     // Randomized Scope Strategy
 
-    // TODO: Wallpaper Selection Strategies
-    // Fixed Time Strategy
-    // Spaced Out Time Strategy
+    let extensions = backend.supported_extensions();
+    let wallpapers = wallpaper::get_wallpapers(&config.directories.wallpaper, &extensions)?;
 
-    // Random Wallpaper
+    if wallpapers.is_empty() {
+        return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
+    }
+
+    // TODO: Wallpaper Selection Strategies
+    // Fixed Time Selection Strategy
+    // Spaced Out Time Selection Strategy
+    // Random Selection Strategy
+
+    // Random Selection Strategy
     let wallpaper_index = rand::random_range(0..wallpapers.len());
     let selected_wallpaper = &wallpapers[wallpaper_index];
 
