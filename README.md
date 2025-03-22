@@ -2,6 +2,26 @@
 
 Express vibes with wallpapers
 
+## 🚗 Cargo Project Commands
+
+Run script using:
+
+```bash
+cargo run
+```
+
+Compile and run script using:
+
+```bash
+cargo build --release
+```
+
+Test using:
+
+```bash
+cargo test
+```
+
 ## Project Requirements
 
 ### Core Features
