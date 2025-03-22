@@ -23,21 +23,21 @@ pub struct DirectoryConfig {
 
 impl Config {
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
-        let default_config = PathBuf::from("config.toml");
+        let default_config_str = include_str!("../config.toml");
+        let default_config: toml::Value = toml::from_str(default_config_str)?;
+
         let user_config = dirs::config_dir()
             .map(|path| path.join("expression/config.toml"))
-            .unwrap_or(default_config.clone());
+            .unwrap_or_else(|| PathBuf::from(""));
 
-        let mut config_str = fs::read_to_string(&default_config)?;
-
-        if user_config.exists() {
+        let config_str = if user_config.exists() {
             let user_config_str = fs::read_to_string(&user_config)?;
             let user_config: toml::Value = toml::from_str(&user_config_str)?;
-            let default_config: toml::Value = toml::from_str(&config_str)?;
-
             let merged_config = merge_toml(default_config, user_config);
-            config_str = toml::to_string(&merged_config)?;
-        }
+            toml::to_string(&merged_config)?
+        } else {
+            toml::to_string(&default_config)?
+        };
 
         let config: Config = toml::from_str(&config_str)?;
         Ok(config)
