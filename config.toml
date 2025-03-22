@@ -3,5 +3,5 @@ backend = "swww"
 
 [directories]
 wallpaper = "/path/to/wallpapers"
-special = "/path/to/special/"
-collections = "/path/to/collections/"
+# special = "/custom/path/to/special/"
+# collections = "/custom/path/to/collections/"

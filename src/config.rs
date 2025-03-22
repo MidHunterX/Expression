@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use toml;
 
 #[derive(Debug, Deserialize)]
@@ -23,7 +23,7 @@ pub struct DirectoryConfig {
 
 impl Config {
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
-        let default_config_str = include_str!("../config.toml");
+        let default_config_str = include_str!("../config.toml");  // include UTF-8 config file as a &str
         let default_config: toml::Value = toml::from_str(default_config_str)?;
 
         let user_config = dirs::config_dir()
@@ -39,7 +39,23 @@ impl Config {
             toml::to_string(&default_config)?
         };
 
-        let config: Config = toml::from_str(&config_str)?;
+        let mut config: Config = toml::from_str(&config_str)?;
+
+        if config.directories.special.is_none() {
+            let wallpaper_path = Path::new(&config.directories.wallpaper);
+            config.directories.special = Some(
+                wallpaper_path
+                    .join("special")
+                    .to_string_lossy()
+                    .into_owned(),
+            );
+        }
+
+        if config.directories.collections.is_none() {
+            let wallpaper_path = Path::new(&config.directories.wallpaper);
+            config.directories.collections = Some(wallpaper_path.to_string_lossy().into_owned());
+        }
+
         Ok(config)
     }
 }
