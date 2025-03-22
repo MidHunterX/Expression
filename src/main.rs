@@ -1,11 +1,17 @@
 mod backends;
 use backends::get_backend;
-use expression::utils::wallpaper::get_wallpapers;
+use config::Config;
+use expression::{config, utils::wallpaper::get_wallpapers};
 use rand::random_range;
 
 fn main() {
-    // TODO: Read backend from a config file
-    let backend_name = "swww";
+    let config = Config::load().unwrap_or_else(|e| {
+        eprintln!("Failed to load config: {}", e);
+        std::process::exit(1);
+    });
+
+    let backend_name = &config.general.backend;
+    let wallpaper_dir = &config.directories.wallpaper;
 
     let backend = match get_backend(backend_name) {
         Ok(b) => b,
@@ -23,10 +29,6 @@ fn main() {
         }
     };
 
-    // TODO: Read wallpapers from a config file
-    let wallpaper_dir = "/windows/Customization/Wallpaper/";
-    // let wallpaper_dir = "/home/midhunter/Mid_Hunter/customization/wallpaper/24h_vibe/";
-
     // Wallpaper List
     let extensions = backend.supported_extensions();
     let wallpapers = match get_wallpapers(wallpaper_dir, &extensions) {
@@ -42,11 +44,23 @@ fn main() {
         std::process::exit(1);
     }
 
+    // TODO: Wallpaper Sourcing Strategies
+    // Special Collection Strategy
+    // Fixed Time Collection Strategy
+    // Themed Collection Strategy
+    // Root Strategy (Wallpaper Dir)
+    // Randomized Scope Strategy
+
+    // TODO: Wallpaper Selection Strategies
+    // Fixed Time Strategy
+    // Spaced Out Time Strategy
+
     // Random Wallpaper
     let wallpaper_index = random_range(0..wallpapers.len());
-    let selected_wallpaper: &str = &wallpapers[wallpaper_index];
+    let selected_wallpaper = &wallpapers[wallpaper_index];
 
     // TEST: Print selected wallpaper
+    println!("LOG: {}", selected_wallpaper);
     println!(
         "LOG: [{}/{}] {}",
         wallpaper_index,
