@@ -50,6 +50,74 @@ cargo test
 
 ## Design Considerations
 
+### Pseudocode
+
+```c
+// Backend Initialization
+backend = get_backend("backend_name");
+backend.init() {
+  check_if_available();
+  initialize();
+}
+
+// Wallpaper Sourcing
+wallpaper_dir = config.get("wallpaper_dir"); // Default
+special_dir = config.get("special_dir"); // User-specified
+collection_dir = config.get("collection_dir"); // User-specified
+
+if (wallpapers.empty()) {
+  exit();
+}
+
+// Wallpaper Selection
+String select_wallpaper() {
+  hour = get_current_time.hour();
+
+  special_entry = special_dir.get(hour);
+  if (special_entry.exists()) {
+    if (special_entry.is_dir()) {
+      // enabled by default
+      if (randomization.scope == "sub-collection") {
+        return special_entry.get_random_file();
+      }
+    }
+    return special_dir.get(hour);
+  }
+
+  // Randomization
+  if (randomization.scope == "all") {
+    return wallpapers.get_random_file();
+  }
+  if (randomization.scope == "collection") {
+    return collection_dir.get_random_file();
+  }
+
+  sub_collection_entry = collection_dir.get(hour);
+  if (sub_collection_entry.exists()) {
+    if (sub_collection_entry.is_dir()) {
+      if (randomization.scope == "sub-collection") {
+        return sub_collection_entry.get_random_file();
+      }
+    }
+    return sub_collection_entry;
+  }
+
+  wallpaper_entry = wallpaper_dir.get(hour);
+  if (wallpaper_entry.exists()) {
+    if (wallpaper_entry.is_dir()) {
+      if (randomization.scope == "sub-collection") {
+        return wallpaper_entry.get_random_file();
+      }
+    }
+    return wallpaper_dir.get(hour);
+  }
+
+  return "";
+}
+
+backend.apply_wallpaper("wallpaper_path")
+```
+
 ### Priority and Collections
 
 The system will implement a hierarchical approach to wallpaper selection:
