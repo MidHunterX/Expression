@@ -23,7 +23,7 @@ pub struct DirectoryConfig {
 
 impl Config {
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
-        let default_config_str = include_str!("../config.toml");  // include UTF-8 config file as a &str
+        let default_config_str = include_str!("../config.toml"); // include UTF-8 config file as a &str
         let default_config: toml::Value = toml::from_str(default_config_str)?;
 
         let user_config = dirs::config_dir()
@@ -56,6 +56,15 @@ impl Config {
             config.directories.collections = Some(wallpaper_path.to_string_lossy().into_owned());
         }
 
+        // Expand dir paths
+        config.directories.wallpaper = expand_path(&config.directories.wallpaper);
+        config.directories.special = config.directories.special.as_ref().map(|p| expand_path(p));
+        config.directories.collections = config
+            .directories
+            .collections
+            .as_ref()
+            .map(|p| expand_path(p));
+
         Ok(config)
     }
 }
@@ -69,4 +78,10 @@ fn merge_toml(mut base: toml::Value, overrides: toml::Value) -> toml::Value {
         }
     }
     base
+}
+
+fn expand_path(path: &str) -> String {
+    shellexpand::full(path)
+        .unwrap_or_else(|_| path.into())
+        .into_owned()
 }

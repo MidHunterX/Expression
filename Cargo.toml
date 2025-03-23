@@ -7,4 +7,11 @@ edition = "2021"
 rand = "0.9.0"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
-dirs = "6.0.0" # for cross-platform config dir
+
+# Cross platform standardized dir locations
+# https://github.com/dirs-dev/dirs-rs?tab=readme-ov-file#introduction
+dirs = "6.0.0"
+
+# Expands ~, %USERPROFILE% and shell env vars like {$HOME}
+# https://docs.rs/shellexpand/latest/shellexpand/
+shellexpand = "3.1.0"
