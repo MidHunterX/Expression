@@ -73,49 +73,54 @@ if (wallpapers.empty()) {
 String select_wallpaper() {
   hour = get_current_time.hour();
 
-  special_entry = special_dir.get(hour);
-  if (special_entry.exists()) {
-    if (special_entry.is_dir()) {
-      // enabled by default
-      if (randomization.scope == "sub-collection") {
-        return special_entry.get_random_file();
-      }
-    }
-    return special_dir.get(hour);
-  }
+  // Special Collection - High-priority
+  special_wallpaper = find_wallpaper_in(special_dir, hour);
+  if (special_wallpaper.exists()) return special_wallpaper;
 
   // Randomization
+  random_wallpaper = get_random_wallpaper();
+  if (random_wallpaper.exists()) return random_wallpaper;
+
+  // Time-based Collection - User specified
+  collection_wallpaper = find_wallpaper_in(collection_dir, hour);
+  if (collection_wallpaper.exists()) return collection_wallpaper;
+
+  // Time-based Default
+  wallpaper = find_wallpaper_in(wallpaper_dir, hour);
+  if (wallpaper.exists()) return wallpaper;
+
+  return null;
+}
+
+backend.apply_wallpaper("wallpaper_path");
+
+// HELPER FUNCTIONS
+
+String find_wallpaper_in(dir, hour) {
+  entry = dir.get(hour);
+  if (!entry.exists()) return "";
+
+  // sub-collection
+  if (entry.is_dir()) {
+    if (randomization.scope == "sub-collection") {
+      return entry.get_random_file();
+    } else {
+      return entry[0]; // first file
+    }
+  }
+  // wallpaper file
+  return entry;
+}
+
+String get_random_wallpaper() {
   if (randomization.scope == "all") {
     return wallpapers.get_random_file();
   }
   if (randomization.scope == "collection") {
     return collection_dir.get_random_file();
   }
-
-  sub_collection_entry = collection_dir.get(hour);
-  if (sub_collection_entry.exists()) {
-    if (sub_collection_entry.is_dir()) {
-      if (randomization.scope == "sub-collection") {
-        return sub_collection_entry.get_random_file();
-      }
-    }
-    return sub_collection_entry;
-  }
-
-  wallpaper_entry = wallpaper_dir.get(hour);
-  if (wallpaper_entry.exists()) {
-    if (wallpaper_entry.is_dir()) {
-      if (randomization.scope == "sub-collection") {
-        return wallpaper_entry.get_random_file();
-      }
-    }
-    return wallpaper_dir.get(hour);
-  }
-
   return "";
 }
-
-backend.apply_wallpaper("wallpaper_path")
 ```
 
 ### Priority and Collections
