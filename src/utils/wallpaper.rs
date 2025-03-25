@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use std::path::PathBuf;
 
 /// Get all wallpapers with supported extensions in a directory
 /// - Returns a vector of file paths regardless of filename
@@ -8,10 +9,10 @@ use std::io;
 pub fn get_wallpapers(
     wallpaper_dir: &str,
     supported_extensions: &[&str],
-) -> Result<Vec<String>, io::Error> {
+) -> Result<Vec<PathBuf>, io::Error> {
     let entries = fs::read_dir(wallpaper_dir)?;
 
-    let wallpapers: Vec<String> = entries
+    let wallpapers: Vec<PathBuf> = entries
         .filter_map(Result::ok)
         .map(|entry| entry.path())
         .filter(|path| {
@@ -22,14 +23,14 @@ pub fn get_wallpapers(
                     .map(|ext| supported_extensions.contains(&ext))
                     .unwrap_or(false)
         })
-        .map(|path| path.display().to_string())
+        // .map(|path| path.display().to_string())
         .collect();
 
     Ok(wallpapers)
 }
 
 /// Get all subcollections (HH) in a directory
-pub fn get_subcollections(wallpaper_dir: &str) -> Result<Vec<String>, io::Error> {
+pub fn get_subcollections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error> {
     let entries = fs::read_dir(wallpaper_dir)?;
     let mut directories = Vec::new();
 
@@ -40,7 +41,7 @@ pub fn get_subcollections(wallpaper_dir: &str) -> Result<Vec<String>, io::Error>
         if path.is_dir() {
             if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
                 if name.chars().all(|c| c.is_numeric()) {
-                    directories.push(path.display().to_string());
+                    directories.push(path);
                 }
             }
         }
@@ -50,8 +51,9 @@ pub fn get_subcollections(wallpaper_dir: &str) -> Result<Vec<String>, io::Error>
 }
 
 pub enum WallpaperEntry {
-    File(String),
-    Directory(String),
+    // File(&'a Path), Adding lifetimes ('a), makes it harder to store in structs
+    File(PathBuf),
+    Directory(PathBuf),
 }
 
 /// Get all entries (wallpapers and sub-collections in the format HH) in a collection
@@ -71,11 +73,11 @@ pub fn get_wallpaper_entries(
         if path.is_file() {
             if let Some(ext) = path.extension().and_then(|ext| ext.to_str()) {
                 if supported_extensions.contains(&ext) {
-                    wallpaper_entries.push(WallpaperEntry::File(path.display().to_string()));
+                    wallpaper_entries.push(WallpaperEntry::File(path));
                 }
             }
         } else if path.is_dir() {
-            wallpaper_entries.push(WallpaperEntry::Directory(path.display().to_string()));
+            wallpaper_entries.push(WallpaperEntry::Directory(path));
         }
     }
 

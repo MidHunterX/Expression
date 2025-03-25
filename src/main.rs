@@ -29,8 +29,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     for entry in entries {
         match entry {
-            wallpaper::WallpaperEntry::File(path) => println!("fil: {}", path),
-            wallpaper::WallpaperEntry::Directory(path) => println!("dir: {}", path),
+            wallpaper::WallpaperEntry::File(path) => {
+                if let Some(filename) = path.file_name() {
+                    println!("file: {}", filename.to_string_lossy());
+                }
+            }
+            wallpaper::WallpaperEntry::Directory(path) => println!("dir: {}", path.display()),
         }
     }
 
@@ -41,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Random Selection Strategy
     let wallpaper_index = rand::random_range(0..wallpapers.len());
-    let selected_wallpaper = &wallpapers[wallpaper_index];
+    let selected_wallpaper = &wallpapers[wallpaper_index].display().to_string();
 
     // TEST: Print selected wallpaper
     println!("LOG: {}", selected_wallpaper);
