@@ -39,6 +39,6 @@ impl Backend for FehBackend {
     }
 
     fn supported_extensions(&self) -> &[&str] {
-        return &["jpg", "png", "jpeg", "webp", "bmp"]
+        &["jpg", "png", "jpeg", "webp", "bmp"]
     }
 }
