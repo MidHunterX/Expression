@@ -20,17 +20,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Randomized Scope Strategy
 
     let extensions = backend.supported_extensions();
-    let wallpapers = wallpaper::get_wallpapers(config.directories.wallpaper.as_str(), extensions)?;
 
+    let wallpapers = wallpaper::get_wallpapers(config.directories.wallpaper.as_str(), extensions)?;
     if wallpapers.is_empty() {
         return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
     }
 
-    let entries = wallpaper::get_wallpaper_entries(&config.directories.wallpaper, extensions)?;
+    let entries = wallpaper::get_wallpaper_entries(config.directories.wallpaper.as_str(), extensions, None)?;
     if entries.is_empty() {
         return Err(format!("No wallpaper entries in {}", config.directories.wallpaper).into());
     }
-    /* for entry in entries {
+    for entry in entries {
         match entry {
             wallpaper::WallpaperEntry::File(path) => {
                 if let Some(filename) = path.file_name() {
@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             wallpaper::WallpaperEntry::Directory(path) => println!("dir: {}", path.display()),
         }
-    } */
+    }
 
     // TODO: Wallpaper Selection Strategies
     // Fixed Time Selection Strategy
