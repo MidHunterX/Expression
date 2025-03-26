@@ -29,9 +29,11 @@ pub fn get_wallpapers(
     Ok(wallpapers)
 }
 
-/// Get all subcollections (HH) in a directory
-/// TODO: Make this get Collections instead
-pub fn get_subcollections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error> {
+/// Get all collections in a directory
+/// - Collections are directories which are not sub-collections (HH)
+/// - So, any directories with names other than HH are considered collections
+/// - Collections e.g. `Dark_Mode/`, `Nature/`, `Light_Mode/`, etc
+pub fn get_collections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error> {
     let entries = fs::read_dir(wallpaper_dir)?;
     let mut directories = Vec::new();
 
@@ -40,9 +42,17 @@ pub fn get_subcollections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error
         let path = entry.path();
 
         if path.is_dir() {
-            if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                if name.chars().all(|c| c.is_numeric()) {
+            let dir_name = path.file_name().and_then(|n| n.to_str());
+            if let Some(name) = dir_name {
+                if name.len() > 2 {
                     directories.push(path);
+                } else {
+                    // Edge case: Collection name has two or less letters
+                    // push only if name does not start with a number
+                    let first_char = name.chars().next().unwrap();
+                    if !first_char.is_numeric() {
+                        directories.push(path);
+                    }
                 }
             }
         }

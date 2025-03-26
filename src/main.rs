@@ -26,7 +26,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
     }
 
-    let entries = wallpaper::get_wallpaper_entries(config.directories.wallpaper.as_str(), extensions, None)?;
+    let collections = wallpaper::get_collections(config.directories.wallpaper.as_str())?;
+    if !collections.is_empty() {
+        for collection in collections {
+            println!("collection: {}", collection.display());
+        }
+    }
+
+    let entries =
+        wallpaper::get_wallpaper_entries(config.directories.wallpaper.as_str(), extensions, None)?;
     if entries.is_empty() {
         return Err(format!("No wallpaper entries in {}", config.directories.wallpaper).into());
     }
