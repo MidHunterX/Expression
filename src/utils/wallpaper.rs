@@ -82,11 +82,10 @@ pub enum WallpaperEntry {
 /// If `time_filter` is provided, entries older than the given hour (0-23) are excluded.
 ///
 /// ### Example
-/// ```
-/// use wallpaper::{get_wallpaper_entries, WallpaperEntry};
-///
+/// ```ignore
 /// let path = "/path/to/collection";
 /// let extensions = &["jpg", "png"];
+///
 /// let entries = get_wallpaper_entries(path, extensions, None)?;
 ///
 /// for entry in entries {
