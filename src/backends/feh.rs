@@ -19,6 +19,10 @@ impl FehBackend {
 }
 
 impl Backend for FehBackend {
+    fn name(&self) -> &str {
+        "feh"
+    }
+
     fn initialize(&self) -> Result<(), Box<dyn Error>> {
         if !Self::is_available() {
             return Err(("feh is not installed").into());

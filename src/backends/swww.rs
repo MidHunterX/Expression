@@ -21,6 +21,10 @@ impl SwwwBackend {
 }
 
 impl Backend for SwwwBackend {
+    fn name(&self) -> &str {
+        "swww"
+    }
+
     fn initialize(&self) -> Result<(), Box<dyn Error>> {
         // Swwww can take a bit while to start
         for _ in 0..5 {

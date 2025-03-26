@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Randomized Scope Strategy
 
     let extensions = backend.supported_extensions();
-    let wallpapers = wallpaper::get_wallpapers(&config.directories.wallpaper, extensions)?;
+    let wallpapers = wallpaper::get_wallpapers(config.directories.wallpaper.as_str(), extensions)?;
 
     if wallpapers.is_empty() {
         return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
@@ -51,24 +51,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let selected_wallpaper = &wallpapers[wallpaper_index].display().to_string();
 
     // TEST: Print selected wallpaper
-    println!("LOG: {}", selected_wallpaper);
     println!(
-        "LOG: [{}/{}] {}",
+        "[DEBUG] Selected wallpaper: [{}/{}] {}",
         wallpaper_index,
         wallpapers.len(),
         // .unwrap() is safe here because script stops if dir is empty
         selected_wallpaper.split('/').last().unwrap()
     );
 
+    // TEST: Print execution time
     let duration = start.elapsed();
-    println!("Execution time: {:?}", duration);
+    println!("[DEBUG] Exec Time: {:?}", duration);
 
     backend.apply_wallpaper(selected_wallpaper)?;
 
+    // TEST: Print execution time with backend
     let duration = start.elapsed();
-    println!(
-        "Execution time ({}): {:?}",
-        &config.general.backend, duration
-    );
+    println!("[DEBUG] Exec Time ({}): {:?}", backend.name(), duration);
+
     Ok(())
 }

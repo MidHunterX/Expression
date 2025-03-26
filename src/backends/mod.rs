@@ -20,4 +20,5 @@ pub trait Backend {
     fn initialize(&self) -> Result<(), Box<dyn Error>>;
     fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>>;
     fn supported_extensions(&self) -> &[&str];
+    fn name(&self) -> &str;
 }
