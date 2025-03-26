@@ -184,6 +184,8 @@ Initialization -> Decision -> Execution -> Waiting
 
 - 24-hour cycle: Fixed time based on filename
 - Spread out (ordered | random): n/m (n = number of wallpapers, m = number of hours)
+  - Special Collection could conflict with this due to inconsistent timings
+  - Would be problematic on large collections
 
 ### Waiting Recalculation Strategy (Scheduling)
 
