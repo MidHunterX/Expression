@@ -8,6 +8,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
 
     let config = Config::load()?;
+    let wallpaper_dir = config.directories.wallpaper.as_str();
 
     let backend = get_backend(&config.general.backend)?;
     backend.initialize()?;
@@ -21,23 +22,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let extensions = backend.supported_extensions();
 
-    let wallpapers = wallpaper::get_wallpapers(config.directories.wallpaper.as_str(), extensions)?;
-    if wallpapers.is_empty() {
-        return Err(format!("No wallpapers found in {}", config.directories.wallpaper).into());
+    let wallpapers = wallpaper::get_wallpapers(wallpaper_dir, extensions)?;
+
+    let collections = wallpaper::get_collections(wallpaper_dir)?;
+    for collection in collections {
+        println!("collection: {}", collection.display());
     }
 
-    let collections = wallpaper::get_collections(config.directories.wallpaper.as_str())?;
-    if !collections.is_empty() {
-        for collection in collections {
-            println!("collection: {}", collection.display());
-        }
-    }
-
-    let entries =
-        wallpaper::get_wallpaper_entries(config.directories.wallpaper.as_str(), extensions, None)?;
-    if entries.is_empty() {
-        return Err(format!("No wallpaper entries in {}", config.directories.wallpaper).into());
-    }
+    let entries = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, None)?;
     for entry in entries {
         match entry {
             wallpaper::WallpaperEntry::File(path) => {

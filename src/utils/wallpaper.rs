@@ -23,8 +23,15 @@ pub fn get_wallpapers(
                     .map(|ext| supported_extensions.contains(&ext))
                     .unwrap_or(false)
         })
-        // .map(|path| path.display().to_string())
         .collect();
+
+    // Bubbling error as wallpapers are required
+    if wallpapers.is_empty() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("No wallpapers found in: {}", wallpaper_dir),
+        ));
+    }
 
     Ok(wallpapers)
 }
@@ -82,10 +89,6 @@ pub enum WallpaperEntry {
 /// let extensions = &["jpg", "png"];
 /// let entries = get_wallpaper_entries(path, extensions, None)?;
 ///
-/// if entries.is_empty() {
-///     return Err(format!("No wallpaper entries in {}", path)));
-/// }
-///
 /// for entry in entries {
 ///     match entry {
 ///         WallpaperEntry::Directory(path) => {
@@ -122,6 +125,14 @@ pub fn get_wallpaper_entries(
                 }
             }
         }
+    }
+
+    // Bubbling error as wallpaper entries are required
+    if time_based_entries.is_empty() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("No wallpaper entries found in: {}", wallpaper_dir),
+        ));
     }
 
     time_based_entries.sort_by_key(|&(hour, _)| hour);
