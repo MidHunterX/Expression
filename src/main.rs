@@ -23,7 +23,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let extensions = backend.supported_extensions();
 
-    let wallpapers = wallpaper::get_wallpapers(wallpaper_dir, extensions)?;
+    // let wallpapers = wallpaper::get_wallpapers(wallpaper_dir, extensions)?;
+    let mut selected_wallpaper = String::new();
 
     let collections = wallpaper::get_collections(wallpaper_dir)?;
     for collection in collections {
@@ -34,20 +35,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hour = Local::now().hour() as u8;
 
     let entries_map = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
-    // if let Some(entry_vector) = entries_map.get(&hour) {
-    for (_hour, entry_vector) in entries_map {
-        println!("----------------[ {} ]", _hour);
+    if let Some(entry_vector) = entries_map.get(&hour) {
+        println!("hour: {}", hour);
         for entry in entry_vector {
             match entry {
+                // sub-collection
                 wallpaper::WallpaperEntry::Directory(path) => {
-                    if let Some(dirname) = path.file_name() {
-                        println!("dir : {}/", dirname.to_string_lossy());
-                    }
+                    // TODO: toggle config
+                    // Random Selection Strategy
+                    let sub_collection_dir = path.display().to_string();
+                    let sub_entries = wallpaper::get_wallpapers(&sub_collection_dir, extensions)?;
+                    let wallpaper_index = rand::random_range(0..sub_entries.len());
+                    selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
+                    // TEST: Print selected wallpaper
+                    println!(
+                        "[DEBUG] Selected wallpaper (rand): [{}/{}] {}",
+                        wallpaper_index,
+                        sub_entries.len(),
+                        selected_wallpaper.split('/').last().unwrap()
+                    );
+                    break;
                 }
+                // entry
                 wallpaper::WallpaperEntry::File(path) => {
-                    if let Some(filename) = path.file_name() {
-                        println!("file: {}", filename.to_string_lossy());
-                    }
+                    selected_wallpaper = path.display().to_string();
+                    // TEST: Print selected wallpaper
+                    println!(
+                        "[DEBUG] Selected wallpaper: {}",
+                        selected_wallpaper.split('/').last().unwrap()
+                    );
+                    break;
                 }
             }
         }
@@ -58,24 +75,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Spaced Out Time Selection Strategy
     // Random Selection Strategy
 
-    // Random Selection Strategy
-    let wallpaper_index = rand::random_range(0..wallpapers.len());
-    let selected_wallpaper = &wallpapers[wallpaper_index].display().to_string();
-
-    // TEST: Print selected wallpaper
-    println!(
-        "[DEBUG] Selected wallpaper: [{}/{}] {}",
-        wallpaper_index,
-        wallpapers.len(),
-        // .unwrap() is safe here because script stops if dir is empty
-        selected_wallpaper.split('/').last().unwrap()
-    );
-
     // TEST: Print execution time
     let duration = start.elapsed();
     println!("[DEBUG] Exec Time: {:?}", duration);
 
-    backend.apply_wallpaper(selected_wallpaper)?;
+    backend.apply_wallpaper(&selected_wallpaper)?;
 
     // TEST: Print execution time with backend
     let duration = start.elapsed();

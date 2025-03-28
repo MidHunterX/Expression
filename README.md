@@ -27,19 +27,19 @@ cargo test
 ### Core Features
 
 - [x] 1. Multi-backend support (swww, feh, etc.)
-- [ ] 2. 24-hour wallpaper cycling with dedicated wallpaper for each hour
+- [x] 2. 24-hour wallpaper cycling with dedicated wallpaper for each hour
 - [ ] 3. Priority-based wallpaper overrides
 - [ ] 4. Collection management for organizing wallpapers by theme
 - [ ] 5. Collection flow control (time-based collection switching)
 - [ ] 6. IPC interface for programmatic wallpaper control
-- [ ] 7. Sub-collections for optional wallpaper sets within each hour
+- [x] 7. Sub-collections for optional wallpaper sets within each hour
 - [ ] 8. Custom script execution support (notifications, pywal integration, etc.)
 - [ ] 9. Randomization with configurable scopes
 - [ ] 10. Per-collection configuration
 - [ ] 11. Time recalibration for system hibernation/sleep recovery
 - [ ] 12. Wallpaper Sourcing Strategies
   - [ ] 12.1. Special Collection Strategy
-  - [ ] 12.2. Time-based Collection Strategy
+  - [x] 12.2. Time-based Collection Strategy
   - [ ] 12.3. Theme-based Collection Strategy
   - [ ] 12.4. Root Strategy (Wallpaper Dir)
   - [ ] 12.5. Randomized Scope Strategy
