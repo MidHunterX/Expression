@@ -108,8 +108,7 @@ pub fn get_wallpaper_entries(
     let entries = fs::read_dir(wallpaper_dir)?;
     let mut wallpaper_map: HashMap<u8, Vec<WallpaperEntry>> = HashMap::new();
 
-    for entry in entries {
-        let entry = entry.unwrap();
+    for entry in entries.flatten() {  // .flatten() skips failed results
         let path = entry.path();
         let filename = path.file_stem().and_then(|name| name.to_str());
 
@@ -135,9 +134,7 @@ pub fn get_wallpaper_entries(
                 };
 
                 // HashMap: dir b4 file
-                wallpaper_map.entry(hour).or_insert_with(Vec::new);
-                let list = wallpaper_map.get_mut(&hour).unwrap();
-
+                let list = wallpaper_map.entry(hour).or_insert_with(Vec::new);
                 if matches!(entry_type, WallpaperEntry::Directory(_)) {
                     list.insert(0, entry_type); // Push directory to front
                 } else {
@@ -148,7 +145,7 @@ pub fn get_wallpaper_entries(
     }
 
     if let Some(filter_hour) = time_filter {
-        wallpaper_map.retain(|&hour, _| hour >= filter_hour);
+        wallpaper_map.retain(|&hour, _entry_vec| hour >= filter_hour);
     }
 
     if wallpaper_map.is_empty() {
