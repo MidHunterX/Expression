@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
@@ -78,7 +78,7 @@ pub enum WallpaperEntry {
 ///
 /// Entries must be formatted as `HH` (e.g., `05`, `12`, `23`).
 /// It collects directories named after hours and files with supported extensions.
-/// Returns HashMap with Vec of entries (sub-collections before files) for each hour.
+/// Returns BTreeMap with Vec of entries (sub-collections before files) for each hour.
 ///
 /// If `time_filter` is provided, entries older than the given hour (0-23) are excluded.
 ///
@@ -87,15 +87,17 @@ pub enum WallpaperEntry {
 /// let path = "/path/to/collection";
 /// let extensions = &["jpg", "png"];
 ///
-/// let entries = get_wallpaper_entries(path, extensions, None)?;
+/// let entries_map = get_wallpaper_entries(path, extensions, None)?;
 ///
-/// for entry in entries {
-///     match entry {
-///         WallpaperEntry::Directory(path) => {
-///             println!("Directory: {}", path.display());
-///         }
-///         WallpaperEntry::File(path) => {
-///             println!("file: {}", path.display());
+/// for entry_vec in entries_map.values() {
+///     for entry in entry_vec {
+///         match entry {
+///             wallpaper::WallpaperEntry::Directory(path) => {
+///                 println!("dir : {}", path.display());
+///             }
+///             wallpaper::WallpaperEntry::File(path) => {
+///                 println!("file: {}", path.display());
+///             }
 ///         }
 ///     }
 /// }
@@ -104,11 +106,14 @@ pub fn get_wallpaper_entries(
     wallpaper_dir: &str,
     supported_extensions: &[&str],
     time_filter: Option<u8>,
-) -> Result<HashMap<u8, Vec<WallpaperEntry>>, io::Error> {
+    // NOTE: Using BTreeMap instead of HashMap to auto sort entries by key
+    // Sorting HashMap is less efficient
+) -> Result<BTreeMap<u8, Vec<WallpaperEntry>>, io::Error> {
     let entries = fs::read_dir(wallpaper_dir)?;
-    let mut wallpaper_map: HashMap<u8, Vec<WallpaperEntry>> = HashMap::new();
+    let mut wallpaper_map: BTreeMap<u8, Vec<WallpaperEntry>> = BTreeMap::new();
 
-    for entry in entries.flatten() {  // .flatten() skips failed results
+    for entry in entries.flatten() {
+        // NOTE: .flatten() auto skips failed results
         let path = entry.path();
         let filename = path.file_stem().and_then(|name| name.to_str());
 
@@ -133,7 +138,7 @@ pub fn get_wallpaper_entries(
                     continue;
                 };
 
-                // HashMap: dir b4 file
+                // BTreeMap: dir b4 file
                 let list = wallpaper_map.entry(hour).or_insert_with(Vec::new);
                 if matches!(entry_type, WallpaperEntry::Directory(_)) {
                     list.insert(0, entry_type); // Push directory to front
@@ -144,6 +149,7 @@ pub fn get_wallpaper_entries(
         }
     }
 
+    // filter
     if let Some(filter_hour) = time_filter {
         wallpaper_map.retain(|&hour, _entry_vec| hour >= filter_hour);
     }

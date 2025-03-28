@@ -34,7 +34,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hour = Local::now().hour() as u8;
 
     let entries_map = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
-    if let Some(entry_vector) = entries_map.get(&hour) {
+    // if let Some(entry_vector) = entries_map.get(&hour) {
+    for (_hour, entry_vector) in entries_map {
+        println!("----------------[ {} ]", _hour);
         for entry in entry_vector {
             match entry {
                 wallpaper::WallpaperEntry::Directory(path) => {
