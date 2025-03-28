@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
@@ -69,7 +70,6 @@ pub fn get_collections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error> {
 }
 
 pub enum WallpaperEntry {
-    // File(&'a Path), Adding lifetimes ('a), makes it harder to store in structs
     File(PathBuf),
     Directory(PathBuf),
 }
@@ -78,6 +78,7 @@ pub enum WallpaperEntry {
 ///
 /// Entries must be formatted as `HH` (e.g., `05`, `12`, `23`).
 /// It collects directories named after hours and files with supported extensions.
+/// Returns HashMap with Vec of entries (sub-collections before files) for each hour.
 ///
 /// If `time_filter` is provided, entries older than the given hour (0-23) are excluded.
 ///
@@ -103,54 +104,59 @@ pub fn get_wallpaper_entries(
     wallpaper_dir: &str,
     supported_extensions: &[&str],
     time_filter: Option<u8>,
-) -> Result<Vec<WallpaperEntry>, io::Error> {
+) -> Result<HashMap<u8, Vec<WallpaperEntry>>, io::Error> {
     let entries = fs::read_dir(wallpaper_dir)?;
-
-    let mut wallpaper_entries = Vec::new();
-    let mut time_based_entries = Vec::new();
+    let mut wallpaper_map: HashMap<u8, Vec<WallpaperEntry>> = HashMap::new();
 
     for entry in entries {
         let entry = entry.unwrap();
         let path = entry.path();
         let filename = path.file_stem().and_then(|name| name.to_str());
 
-        // Valid entries in format HH
         if let Some(filename) = filename {
-            if filename.len() == 2 {
-                if let Ok(hour) = filename.parse::<u8>() {
-                    if hour < 24 {
-                        time_based_entries.push((hour, path.clone()));
+            if let Ok(hour) = filename.parse::<u8>() {
+                if hour >= 24 {
+                    continue;
+                }
+                let entry_type = if path.is_dir() {
+                    WallpaperEntry::Directory(path)
+                } else if path.is_file() {
+                    if let Some(ext) = path.extension().and_then(|ext| ext.to_str()) {
+                        if supported_extensions.contains(&ext) {
+                            WallpaperEntry::File(path)
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        continue;
                     }
+                } else {
+                    continue;
+                };
+
+                // HashMap: dir b4 file
+                wallpaper_map.entry(hour).or_insert_with(Vec::new);
+                let list = wallpaper_map.get_mut(&hour).unwrap();
+
+                if matches!(entry_type, WallpaperEntry::Directory(_)) {
+                    list.insert(0, entry_type); // Push directory to front
+                } else {
+                    list.push(entry_type);
                 }
             }
         }
     }
 
-    // Bubbling error as wallpaper entries are required
-    if time_based_entries.is_empty() {
+    if let Some(filter_hour) = time_filter {
+        wallpaper_map.retain(|&hour, _| hour >= filter_hour);
+    }
+
+    if wallpaper_map.is_empty() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
             format!("No wallpaper entries found in: {}", wallpaper_dir),
         ));
     }
 
-    time_based_entries.sort_by_key(|&(hour, _)| hour);
-
-    if let Some(filter_hour) = time_filter {
-        time_based_entries.retain(|&(hour, _)| hour >= filter_hour);
-    }
-
-    for (_, path) in time_based_entries {
-        if path.is_file() {
-            if let Some(ext) = path.extension().and_then(|ext| ext.to_str()) {
-                if supported_extensions.contains(&ext) {
-                    wallpaper_entries.push(WallpaperEntry::File(path));
-                }
-            }
-        } else if path.is_dir() {
-            wallpaper_entries.push(WallpaperEntry::Directory(path));
-        }
-    }
-
-    Ok(wallpaper_entries)
+    Ok(wallpaper_map)
 }

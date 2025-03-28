@@ -1,9 +1,9 @@
 mod backends;
 use backends::get_backend;
+use chrono::{Local, Timelike};
 use config::Config;
 use expression::{config, utils::wallpaper};
 use std::time::Instant;
-use chrono::{Local, Timelike};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
@@ -33,17 +33,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Chrono Time
     let hour = Local::now().hour() as u8;
 
-    let entries = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
-    for entry in entries {
-        match entry {
-            wallpaper::WallpaperEntry::File(path) => {
-                if let Some(filename) = path.file_name() {
-                    println!("file: {}", filename.to_string_lossy());
+    let entries_map = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
+    if let Some(entry_vector) = entries_map.get(&hour) {
+        for entry in entry_vector {
+            match entry {
+                wallpaper::WallpaperEntry::Directory(path) => {
+                    if let Some(dirname) = path.file_name() {
+                        println!("dir : {}/", dirname.to_string_lossy());
+                    }
                 }
-            }
-            wallpaper::WallpaperEntry::Directory(path) => {
-                if let Some(dirname) = path.file_name() {
-                    println!("dir : {}/", dirname.to_string_lossy());
+                wallpaper::WallpaperEntry::File(path) => {
+                    if let Some(filename) = path.file_name() {
+                        println!("file: {}", filename.to_string_lossy());
+                    }
                 }
             }
         }
