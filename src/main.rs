@@ -3,6 +3,7 @@ use backends::get_backend;
 use config::Config;
 use expression::{config, utils::wallpaper};
 use std::time::Instant;
+use chrono::{Local, Timelike};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
@@ -29,7 +30,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("collection: {}", collection.display());
     }
 
-    let entries = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, None)?;
+    // Chrono Time
+    let hour = Local::now().hour() as u8;
+
+    let entries = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
     for entry in entries {
         match entry {
             wallpaper::WallpaperEntry::File(path) => {
@@ -37,7 +41,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("file: {}", filename.to_string_lossy());
                 }
             }
-            wallpaper::WallpaperEntry::Directory(path) => println!("dir: {}", path.display()),
+            wallpaper::WallpaperEntry::Directory(path) => {
+                if let Some(dirname) = path.file_name() {
+                    println!("dir : {}/", dirname.to_string_lossy());
+                }
+            }
         }
     }
 
