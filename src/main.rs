@@ -22,6 +22,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_entries_enabled = config.general.enable_special;
     let sub_collection_enabled = config.general.enable_sub_collection;
 
+    let mut selected_wallpaper = String::new();
+
     loop {
         let now = Local::now();
         let seconds = now.second();
@@ -29,10 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let hour = now.hour() as u8;
         println!("[DEBUG] This Hour: {}", hour);
 
-        let mut selected_wallpaper = String::new();
-        if selected_wallpaper.is_empty() {
-            println!("[WARN] No wallpaper selected");
-        }
+        selected_wallpaper.clear();
 
         // TODO: Collection: Theme Override Strategy
         let collections = wallpaper::get_collections(wallpaper_dir)?;
@@ -106,6 +105,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
+        if selected_wallpaper.is_empty() {
+            println!("[WARN] No wallpaper selected");
+        }
+
         // TODO: Wallpaper Selection Strategies
         // Spaced Out Time Selection Strategy
         // Random Selection Strategy
@@ -144,10 +147,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Mitigates the Sleep/Hibernate issue to an extent without much wakeup calls
         if refresh_strategy == "T/2" {
             let mut refresh_seconds = wait_seconds;
-            while refresh_seconds > 60 {
+            while refresh_seconds > 1 {
                 refresh_seconds /= 2;
-                println!("[DEBUG] Refreshing in {} seconds", refresh_seconds);
+
+                // Clamp refresh_seconds
+                if refresh_seconds < 2 {
+                    refresh_seconds = 2;
+                }
+
+                println!(
+                    "[DEBUG] Refreshing in {}",
+                    if refresh_seconds > 60 {
+                        format!("{} minutes", refresh_seconds / 60)
+                    } else {
+                        format!("{} seconds", refresh_seconds)
+                    }
+                );
+
                 thread::sleep(Duration::from_secs(refresh_seconds));
+
                 // Re-calculate refresh time
                 let now = Local::now();
                 let seconds = now.second();
@@ -156,18 +174,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // new_hour > hour = next hour
                 // new_hour < hour = next day (midnight)
                 if new_hour != hour {
+                    println!("[DEBUG] Hour Changed: {}", new_hour);
                     break;
                 }
                 let remaining_seconds = 60 - seconds;
                 let wait_minutes = refresh_time - (minute % refresh_time) - 1;
                 let new_wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
+                refresh_seconds = new_wait_seconds;
                 // Edge Case - would never happen as loop already breaks on next hour
-                if new_wait_seconds < refresh_seconds {
+                // new_wait_seconds would almost be similar to refresh_seconds
+                // because new_wait_seconds = prev refresh_seconds / 2
+                /* if new_wait_seconds < refresh_seconds {
                     refresh_seconds = new_wait_seconds;
-                } else {
-                    break;
-                }
+                } */
             }
+            println!("[DEBUG] Out of T/2 Refresh Loop");
+            thread::sleep(Duration::from_secs(1));
         }
         // Refresh: T Strategy
         // Simply waits until next wallpaper refresh time
