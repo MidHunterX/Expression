@@ -20,14 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let special_entries_map = config.special_entries;
     let special_entries_enabled = config.general.enable_special;
+    let sub_collection_enabled = config.general.enable_sub_collection;
 
     loop {
-        let seconds = Local::now().second();
-        let minute = Local::now().minute();
-        let hour = Local::now().hour() as u8;
+        let now = Local::now();
+        let seconds = now.second();
+        let minute = now.minute();
+        let hour = now.hour() as u8;
         println!("[DEBUG] This Hour: {}", hour);
-        let next_hour = (hour + 1) % 24;
-        println!("[DEBUG] Next Hour: {}", next_hour);
 
         let mut selected_wallpaper = String::new();
         if selected_wallpaper.is_empty() {
@@ -74,6 +74,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match entry {
                         // SUB-COLLECTION
                         wallpaper::WallpaperEntry::Directory(path) => {
+                            if !sub_collection_enabled {
+                                continue;
+                            }
                             // Selection: Random Strategy
                             let sub_collection_dir = path.display().to_string();
                             let sub_entries =
@@ -132,13 +135,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "[INFO] Waiting for {} minutes and {} seconds",
             wait_minutes, remaining_seconds
         );
-
-        // Refresh: T/2 Strategy
-        let mut refresh_seconds = wait_seconds;
-        while refresh_seconds > 2 {
-            refresh_seconds /= 2;
-            println!("[DEBUG] Refreshing in {} seconds", refresh_seconds);
-            thread::sleep(Duration::from_secs(refresh_seconds));
-        }
+        thread::sleep(Duration::from_secs(wait_seconds));
     }
 }

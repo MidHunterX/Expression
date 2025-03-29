@@ -15,6 +15,7 @@ pub struct Config {
 pub struct GeneralConfig {
     pub backend: String,
     pub enable_special: bool,
+    pub enable_sub_collection: bool
 }
 
 #[derive(Debug, Deserialize)]
