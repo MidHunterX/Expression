@@ -16,6 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // NOTE: Don't worry, JFK doesn't get Executed as defaults come from config
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let special_entries_map = config.special_entries;
+    let special_entries_enabled = config.general.enable_special;
 
     let hour = Local::now().hour() as u8;
     println!("[DEBUG] This Hour: {}", hour);
@@ -36,7 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: Randomized Scope Strategy
 
     // Collection: Special Strategy
-    if selected_wallpaper.is_empty() {
+    if selected_wallpaper.is_empty() && special_entries_enabled {
         let special_entries = wallpaper::get_wallpapers(special_dir, extensions);
         match special_entries {
             Ok(entries) => {

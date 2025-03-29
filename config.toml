@@ -1,5 +1,6 @@
 [general]
 backend = "swww"
+enable_special = true
 
 [directories]
 wallpaper = "/path/to/wallpapers"

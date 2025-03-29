@@ -14,6 +14,7 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct GeneralConfig {
     pub backend: String,
+    pub enable_special: bool,
 }
 
 #[derive(Debug, Deserialize)]
