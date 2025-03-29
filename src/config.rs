@@ -76,7 +76,23 @@ fn merge_toml(mut base: toml::Value, overrides: toml::Value) -> toml::Value {
         (&mut base, overrides)
     {
         for (key, override_value) in override_table {
-            base_table.insert(key, override_value);
+            match base_table.get(&key) {
+                // If key exists in both, recursively merge if both are tables
+                Some(base_value) => {
+                    if let (toml::Value::Table(_), toml::Value::Table(_)) = (base_value, &override_value) {
+                        // Create new merged value
+                        let merged = merge_toml(base_value.clone(), override_value);
+                        base_table.insert(key, merged);
+                    } else {
+                        // Else replace value
+                        base_table.insert(key, override_value);
+                    }
+                },
+                // If key not exist in base, insert override value
+                None => {
+                    base_table.insert(key, override_value);
+                },
+            }
         }
     }
     base
