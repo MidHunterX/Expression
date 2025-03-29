@@ -135,6 +135,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "[INFO] Waiting for {} minutes and {} seconds",
             wait_minutes, remaining_seconds
         );
-        thread::sleep(Duration::from_secs(wait_seconds));
+
+        // TODO: Move this to config
+        let refresh_strategy = "T/2";
+
+        // Refresh: T/2 Strategy
+        // Re-calculates refresh time every T/2 seconds
+        // Mitigates the Sleep/Hibernate issue to an extent without much wakeup calls
+        if refresh_strategy == "T/2" {
+            let mut refresh_seconds = wait_seconds;
+            while refresh_seconds > 60 {
+                refresh_seconds /= 2;
+                println!("[DEBUG] Refreshing in {} seconds", refresh_seconds);
+                thread::sleep(Duration::from_secs(refresh_seconds));
+                // Re-calculate refresh time
+                let now = Local::now();
+                let seconds = now.second();
+                let minute = now.minute();
+                let new_hour = now.hour() as u8;
+                // new_hour > hour = next hour
+                // new_hour < hour = next day (midnight)
+                if new_hour != hour {
+                    break;
+                }
+                let remaining_seconds = 60 - seconds;
+                let wait_minutes = refresh_time - (minute % refresh_time) - 1;
+                let new_wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
+                // Edge Case - would never happen as loop already breaks on next hour
+                if new_wait_seconds < refresh_seconds {
+                    refresh_seconds = new_wait_seconds;
+                } else {
+                    break;
+                }
+            }
+        }
+        // Refresh: T Strategy
+        // Simply waits until next wallpaper refresh time
+        else if refresh_strategy == "T" {
+            thread::sleep(Duration::from_secs(wait_seconds));
+        } else {
+            println!("[ERROR] Invalid Refresh Strategy: {}", refresh_strategy);
+            break; // Breaks out of main loop and exits to avoid infinite loop
+        }
     }
+    Ok(())
 }
