@@ -15,6 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let wallpaper_dir = config.directories.wallpaper.as_str();
     // NOTE: Don't worry, JFK doesn't get Executed as defaults come from config
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
+    let special_entries_map = config.special_entries;
 
     let hour = Local::now().hour() as u8;
     println!("[DEBUG] This Hour: {}", hour);
@@ -22,6 +23,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("[DEBUG] Next Hour: {}", next_hour);
 
     let mut selected_wallpaper = String::new();
+    if selected_wallpaper.is_empty() {
+        println!("[WARN] No wallpaper selected");
+    }
 
     // TODO: Collection: Theme Override Strategy
     let collections = wallpaper::get_collections(wallpaper_dir)?;
@@ -31,49 +35,62 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // TODO: Randomized Scope Strategy
 
-    // TODO: Collection: Special Strategy
-    let special_entries = wallpaper::get_wallpapers(special_dir, extensions);
-    match special_entries {
-        Ok(entries) => {
-            for entry in entries {
-                println!("special: {}", entry.display());
+    // Collection: Special Strategy
+    if selected_wallpaper.is_empty() {
+        let special_entries = wallpaper::get_wallpapers(special_dir, extensions);
+        match special_entries {
+            Ok(entries) => {
+                if let Some(filename) = special_entries_map.get(&hour.to_string()) {
+                    if let Some(matching_path) = entries.iter().find(|path| {
+                        path.file_stem()
+                            .and_then(|s| s.to_str())
+                            .map(|s| s == filename)
+                            .unwrap_or(false)
+                    }) {
+                        println!("[INFO] Special Wallpaper for {}: {:?}", hour, matching_path);
+                        selected_wallpaper = matching_path.display().to_string();
+                    }
+                }
             }
-        }
-        Err(err) => {
-            println!("[WARN] Special Collection Error: {}", err);
+            Err(err) => {
+                println!("[WARN] Special Collection Error: {}", err);
+            }
         }
     }
 
     // Collection: Fixed Time Strategy
-    let entries_map = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
-    if let Some(entry_vector) = entries_map.get(&hour) {
-        for entry in entry_vector {
-            match entry {
-                // SUB-COLLECTION
-                wallpaper::WallpaperEntry::Directory(path) => {
-                    // TODO: toggle sub-collection config
-                    // Selection: Random Strategy
-                    let sub_collection_dir = path.display().to_string();
-                    let sub_entries = wallpaper::get_wallpapers(&sub_collection_dir, extensions)?;
-                    let wallpaper_index = rand::random_range(0..sub_entries.len());
-                    selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
-                    println!(
-                        "[INFO] Selected Wallpaper: [{}/{}] {}",
-                        wallpaper_index,
-                        sub_entries.len(),
-                        selected_wallpaper.split('/').last().unwrap()
-                    );
-                    break;
-                }
-                // ENTRY
-                wallpaper::WallpaperEntry::File(path) => {
-                    // Selection: Fixed Time Strategy
-                    selected_wallpaper = path.display().to_string();
-                    println!(
-                        "[INFO] Selected wallpaper: {}",
-                        selected_wallpaper.split('/').last().unwrap()
-                    );
-                    break;
+    if selected_wallpaper.is_empty() {
+        let entries_map = wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
+        if let Some(entry_vector) = entries_map.get(&hour) {
+            for entry in entry_vector {
+                match entry {
+                    // SUB-COLLECTION
+                    wallpaper::WallpaperEntry::Directory(path) => {
+                        // TODO: toggle sub-collection config
+                        // Selection: Random Strategy
+                        let sub_collection_dir = path.display().to_string();
+                        let sub_entries =
+                            wallpaper::get_wallpapers(&sub_collection_dir, extensions)?;
+                        let wallpaper_index = rand::random_range(0..sub_entries.len());
+                        selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
+                        println!(
+                            "[INFO] Selected Wallpaper: [{}/{}] {}",
+                            wallpaper_index,
+                            sub_entries.len(),
+                            selected_wallpaper.split('/').last().unwrap()
+                        );
+                        break;
+                    }
+                    // ENTRY
+                    wallpaper::WallpaperEntry::File(path) => {
+                        // Selection: Fixed Time Strategy
+                        selected_wallpaper = path.display().to_string();
+                        println!(
+                            "[INFO] Selected wallpaper: {}",
+                            selected_wallpaper.split('/').last().unwrap()
+                        );
+                        break;
+                    }
                 }
             }
         }

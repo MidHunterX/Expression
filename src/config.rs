@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use toml;
@@ -7,6 +8,7 @@ use toml;
 pub struct Config {
     pub general: GeneralConfig,
     pub directories: DirectoryConfig,
+    pub special_entries: BTreeMap<String, String>
 }
 
 #[derive(Debug, Deserialize)]

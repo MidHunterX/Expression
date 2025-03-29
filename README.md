@@ -38,7 +38,7 @@ cargo test
 - [ ] 10. Per-collection configuration
 - [ ] 11. Time recalibration for system hibernation/sleep recovery
 - [ ] 12. Wallpaper Sourcing Strategies
-  - [ ] 12.1. Special Collection Strategy
+  - [x] 12.1. Special Collection Strategy
   - [x] 12.2. Time-based Collection Strategy
   - [ ] 12.3. Theme-based Collection Strategy
   - [ ] 12.4. Root Strategy (Wallpaper Dir)
