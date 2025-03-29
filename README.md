@@ -28,7 +28,7 @@ cargo test
 
 - [x] 1. Multi-backend support (swww, feh, etc.)
 - [x] 2. 24-hour wallpaper cycling with dedicated wallpaper for each hour
-- [ ] 3. Priority-based wallpaper overrides
+- [x] 3. Priority-based wallpaper overrides
 - [ ] 4. Collection management for organizing wallpapers by theme
 - [ ] 5. Collection flow control (time-based collection switching)
 - [ ] 6. IPC interface for programmatic wallpaper control
@@ -44,7 +44,7 @@ cargo test
   - [ ] 12.4. Root Strategy (Wallpaper Dir)
   - [ ] 12.5. Randomized Scope Strategy
 - [ ] 13. Wallpaper Application Algorithms
-  - [ ] 13.1. 24-hour cycle: Fixed time based on filename
+  - [x] 13.1. 24-hour cycle: Fixed time based on filename
   - [ ] 13.2. Spread out (ordered | random): n/m (n = number of wallpapers, m = number of hours)
   - [ ] 13.3. Randomized Scope (Within Collection)
 
