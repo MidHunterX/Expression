@@ -2,7 +2,10 @@ use chrono::{Local, Timelike};
 use expression::backends::get_backend;
 use expression::config::Config;
 use expression::utils::wallpaper;
-use std::time::Instant;
+use std::{
+    thread,
+    time::{Duration, Instant},
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
@@ -18,6 +21,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_entries_map = config.special_entries;
     let special_entries_enabled = config.general.enable_special;
 
+    let seconds = Local::now().second();
+    let minute = Local::now().minute();
     let hour = Local::now().hour() as u8;
     println!("[DEBUG] This Hour: {}", hour);
     let next_hour = (hour + 1) % 24;
@@ -104,11 +109,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let duration = start.elapsed();
     println!("[DEBUG] Exec Time: {:?}", duration);
 
-    backend.apply_wallpaper(&selected_wallpaper)?;
-    println!("[INFO] Wallpaper Applied Successfully");
+    if selected_wallpaper.is_empty() {
+        println!("[WARN] No wallpaper available for {}", hour);
+    } else {
+        backend.apply_wallpaper(&selected_wallpaper)?;
+        println!("[INFO] Wallpaper for {} Applied Successfully", hour);
+    }
 
     let duration = start.elapsed();
     println!("[DEBUG] Exec Time ({}): {:?}", backend.name(), duration);
+
+    // TODO: Wait Strategy:
+    // 60 for 24 hours cycle
+    // (entries.len() / 24) for spaced out
+    let refresh_time = 60;
+    let remaining_seconds = 60 - seconds;
+    let wait_minutes = refresh_time - (minute % refresh_time) - 1; // -1 for calculating current remaining_seconds
+    let wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
+    println!(
+        "[INFO] Waiting for {} minutes and {} seconds",
+        wait_minutes, remaining_seconds
+    );
+
+    // Refresh: T/2 Strategy
+    let mut refresh_seconds = wait_seconds;
+    while refresh_seconds > 2 {
+        refresh_seconds /= 2;
+        println!("[DEBUG] Refreshing in {} seconds", refresh_seconds);
+        thread::sleep(Duration::from_secs(refresh_seconds));
+    }
 
     Ok(())
 }
