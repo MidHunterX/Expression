@@ -1,12 +1,10 @@
 # Expression
 
-**Expressive and Smort Wallpaper Selector**
-
 ## Overview
 
-Expression is a highly efficient, Rust-powered wallpaper selector designed for
-**performance and flexibility**. If you have a bash script to set wallpapers
-throughout the day, this is exactly that but better.
+Expression is a highly efficient, wallpaper selector designed for **Algorithm
+based wallpaper selection and Power efficiency**. If you have a bash script to
+set wallpapers throughout the day, this is exactly that but better.
 
 ## Installation
 
@@ -55,7 +53,7 @@ backend = "swww"
 # enable_sub_collection = true
 
 [directories]
-wallpaper = "~/Pictures/Wallpapers"
+wallpaper = "~/Pictures/wallpaper_dir"
 # special = "~/Pictures/Wallpapers/Special"
 
 # [special_entries]
