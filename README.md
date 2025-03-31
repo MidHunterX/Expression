@@ -28,10 +28,10 @@ Run Expression as a daemon:
 expression &
 ```
 
-Or manually execute it once:
+Run Expression with debug logs:
 
 ```sh
-expression --once
+RUST_LOG=debug expression
 ```
 
 ### Configuration

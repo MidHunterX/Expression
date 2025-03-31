@@ -153,7 +153,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // (entries.len() / 24) for spaced out
 
         // Wait: 24 Hour Cycle Strategy
-        let refresh_time = 60;
+        let refresh_time = 60; // Minutes
         let remaining_seconds = 60 - seconds;
         let wait_minutes = refresh_time - (minute % refresh_time) - 1; // -1 for calculating current remaining_seconds
         let wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
@@ -170,16 +170,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Mitigates the Sleep/Hibernate issue to an extent without much wakeup calls
         if refresh_strategy == "T/2" {
             let mut refresh_seconds = wait_seconds;
+            debug!("-------------------------------------");
             while refresh_seconds > 1 {
                 refresh_seconds /= 2;
 
                 // Clamp refresh_seconds
-                if refresh_seconds < 1 {
+                if refresh_seconds < 2 {
                     refresh_seconds = 1;
                 }
 
                 debug!(
-                    "Refreshing again in {}...",
+                    "Recalculating in {}...",
                     if refresh_seconds > 60 {
                         format!(
                             "{}:{}",
@@ -192,6 +193,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
 
                 thread::sleep(Duration::from_secs(refresh_seconds));
+
+                let start_calc = Instant::now();
 
                 // Re-calculate refresh time
                 let now = Local::now();
@@ -214,8 +217,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 /* if new_wait_seconds < refresh_seconds {
                     refresh_seconds = new_wait_seconds;
                 } */
+                debug!(
+                    "Recalculation Time: {}",
+                    format!("{:?}", start_calc.elapsed()).cyan()
+                );
             }
-            debug!("Out of T/2 Refresh Loop");
+            debug!("-------------------------------------");
             thread::sleep(Duration::from_secs(1));
         }
         // Refresh: T Strategy
