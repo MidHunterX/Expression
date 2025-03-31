@@ -1,4 +1,5 @@
 use chrono::{Local, Timelike};
+use colored::Colorize;
 use expression::backends::get_backend;
 use expression::config::Config;
 use expression::utils::wallpaper;
@@ -18,7 +19,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let extensions = backend.supported_extensions();
 
     env_logger::builder().format_timestamp(None).init();
-    debug!("Init Time ({}): {:?}", backend_name, start.elapsed());
+    debug!(
+        "Init Time ({}): {}",
+        backend_name,
+        format!("{:?}", start.elapsed()).cyan()
+    );
 
     let wallpaper_dir = config.directories.wallpaper.as_str();
     // Don't worry, JFK doesn't get Executed as defaults come from config
@@ -35,7 +40,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let seconds = now.second();
         let minute = now.minute();
         let hour = now.hour() as u8;
-        debug!("This Hour: {}", hour);
+        debug!(
+            "Current Time: {}",
+            format!("{}", now.format("%H:%M")).cyan()
+        );
 
         selected_wallpaper.clear();
 
@@ -60,8 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 .unwrap_or(false)
                         }) {
                             info!(
-                                "Special Wallpaper for {}: {}",
-                                hour,
+                                "Selected Special: {}",
                                 matching_path
                                     .file_name()
                                     .and_then(|s| s.to_str())
@@ -84,7 +91,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Some(entry_vector) = entries_map.get(&hour) {
                 for entry in entry_vector {
                     match entry {
-                        // SUB-COLLECTION
+                        // WALLPAPER GROUP
                         wallpaper::WallpaperEntry::Directory(path) => {
                             if !sub_collection_enabled {
                                 continue;
@@ -103,12 +110,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             );
                             break;
                         }
-                        // ENTRY
+                        // WALLPAPER ENTRY
                         wallpaper::WallpaperEntry::File(path) => {
                             // Selection: Fixed Time Strategy
                             selected_wallpaper = path.display().to_string();
                             info!(
-                                "Selected wallpaper: {}",
+                                "Selected Wallpaper: {}",
                                 selected_wallpaper.split('/').last().unwrap()
                             );
                             break;
@@ -126,18 +133,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Spaced Out Time Selection Strategy
         // Random Selection Strategy
 
-        debug!("Exec Time: {:?}", start.elapsed());
+        debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
         let start = Instant::now();
 
         if selected_wallpaper.is_empty() {
             warn!("No wallpaper available for {}", hour);
         } else {
             backend.apply_wallpaper(&selected_wallpaper)?;
-            info!("Wallpaper for {} Applied Successfully", hour);
+            info!("Wallpaper applied successfully!");
         }
 
-        let duration = start.elapsed();
-        debug!("Exec Time ({}): {:?}", backend_name, duration);
+        debug!(
+            "Exec Time ({}): {}",
+            backend_name,
+            format!("{:?}", start.elapsed()).cyan()
+        );
 
         // TODO: Wait Strategy:
         // (entries.len() / 24) for spaced out
