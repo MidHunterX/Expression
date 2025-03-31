@@ -2,6 +2,7 @@ use chrono::{Local, Timelike};
 use expression::backends::get_backend;
 use expression::config::Config;
 use expression::utils::wallpaper;
+use log::{debug, error, info, warn};
 use std::{
     thread,
     time::{Duration, Instant},
@@ -13,7 +14,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let backend = get_backend(&config.general.backend)?;
     backend.initialize()?;
+    let backend_name = backend.name();
     let extensions = backend.supported_extensions();
+
+    env_logger::builder().format_timestamp(None).init();
+    debug!("Init Time ({}): {:?}", backend_name, start.elapsed());
 
     let wallpaper_dir = config.directories.wallpaper.as_str();
     // Don't worry, JFK doesn't get Executed as defaults come from config
@@ -25,11 +30,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut selected_wallpaper = String::new();
 
     loop {
+        let start = Instant::now();
         let now = Local::now();
         let seconds = now.second();
         let minute = now.minute();
         let hour = now.hour() as u8;
-        println!("[DEBUG] This Hour: {}", hour);
+        debug!("This Hour: {}", hour);
 
         selected_wallpaper.clear();
 
@@ -53,13 +59,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 .map(|s| s == filename)
                                 .unwrap_or(false)
                         }) {
-                            println!("[INFO] Special Wallpaper for {}: {:?}", hour, matching_path);
+                            info!(
+                                "Special Wallpaper for {}: {}",
+                                hour,
+                                matching_path
+                                    .file_name()
+                                    .and_then(|s| s.to_str())
+                                    .unwrap_or("Unknown")
+                            );
                             selected_wallpaper = matching_path.display().to_string();
                         }
                     }
                 }
                 Err(err) => {
-                    println!("[WARN] Special Collection Error: {}", err);
+                    warn!("Special Collection Error: {}", err);
                 }
             }
         }
@@ -82,8 +95,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 wallpaper::get_wallpapers(&sub_collection_dir, extensions)?;
                             let wallpaper_index = rand::random_range(0..sub_entries.len());
                             selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
-                            println!(
-                                "[INFO] Selected Wallpaper: [{}/{}] {}",
+                            info!(
+                                "Selected Wallpaper: [{}/{}] {}",
                                 wallpaper_index,
                                 sub_entries.len(),
                                 selected_wallpaper.split('/').last().unwrap()
@@ -94,8 +107,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         wallpaper::WallpaperEntry::File(path) => {
                             // Selection: Fixed Time Strategy
                             selected_wallpaper = path.display().to_string();
-                            println!(
-                                "[INFO] Selected wallpaper: {}",
+                            info!(
+                                "Selected wallpaper: {}",
                                 selected_wallpaper.split('/').last().unwrap()
                             );
                             break;
@@ -106,25 +119,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         if selected_wallpaper.is_empty() {
-            println!("[WARN] No wallpaper selected");
+            warn!("No wallpaper selected");
         }
 
         // TODO: Wallpaper Selection Strategies
         // Spaced Out Time Selection Strategy
         // Random Selection Strategy
 
-        let duration = start.elapsed();
-        println!("[DEBUG] Exec Time: {:?}", duration);
+        debug!("Exec Time: {:?}", start.elapsed());
+        let start = Instant::now();
 
         if selected_wallpaper.is_empty() {
-            println!("[WARN] No wallpaper available for {}", hour);
+            warn!("No wallpaper available for {}", hour);
         } else {
             backend.apply_wallpaper(&selected_wallpaper)?;
-            println!("[INFO] Wallpaper for {} Applied Successfully", hour);
+            info!("Wallpaper for {} Applied Successfully", hour);
         }
 
         let duration = start.elapsed();
-        println!("[DEBUG] Exec Time ({}): {:?}", backend.name(), duration);
+        debug!("Exec Time ({}): {:?}", backend_name, duration);
 
         // TODO: Wait Strategy:
         // (entries.len() / 24) for spaced out
@@ -134,8 +147,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let remaining_seconds = 60 - seconds;
         let wait_minutes = refresh_time - (minute % refresh_time) - 1; // -1 for calculating current remaining_seconds
         let wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
-        println!(
-            "[INFO] Waiting for {} minutes and {} seconds",
+        info!(
+            "Waiting for {} minutes and {} seconds",
             wait_minutes, remaining_seconds
         );
 
@@ -155,8 +168,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     refresh_seconds = 2;
                 }
 
-                println!(
-                    "[DEBUG] Refreshing in {}",
+                debug!(
+                    "Refreshing again in {}...",
                     if refresh_seconds > 60 {
                         format!("{} minutes", refresh_seconds / 60)
                     } else {
@@ -174,7 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // new_hour > hour = next hour
                 // new_hour < hour = next day (midnight)
                 if new_hour != hour {
-                    println!("[DEBUG] Hour Changed: {}", new_hour);
+                    debug!("Hour Changed: {}", new_hour);
                     break;
                 }
                 let remaining_seconds = 60 - seconds;
@@ -188,7 +201,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     refresh_seconds = new_wait_seconds;
                 } */
             }
-            println!("[DEBUG] Out of T/2 Refresh Loop");
+            debug!("Out of T/2 Refresh Loop");
             thread::sleep(Duration::from_secs(1));
         }
         // Refresh: T Strategy
@@ -196,7 +209,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         else if refresh_strategy == "T" {
             thread::sleep(Duration::from_secs(wait_seconds));
         } else {
-            println!("[ERROR] Invalid Refresh Strategy: {}", refresh_strategy);
+            error!("Invalid Refresh Strategy: {}", refresh_strategy);
             break; // Breaks out of main loop and exits to avoid infinite loop
         }
     }
