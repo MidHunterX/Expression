@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     debug!(
         "Init Time ({}): {}",
         backend_name,
-        format!("{:?}", start.elapsed()).cyan()
+        format!("{:?}", start.elapsed()).blue()
     );
 
     let wallpaper_dir = config.directories.wallpaper.as_str();
@@ -146,7 +146,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug!(
             "Exec Time ({}): {}",
             backend_name,
-            format!("{:?}", start.elapsed()).cyan()
+            format!("{:?}", start.elapsed()).blue()
         );
 
         // TODO: Wait Strategy:
@@ -174,16 +174,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 refresh_seconds /= 2;
 
                 // Clamp refresh_seconds
-                if refresh_seconds < 2 {
-                    refresh_seconds = 2;
+                if refresh_seconds < 1 {
+                    refresh_seconds = 1;
                 }
 
                 debug!(
                     "Refreshing again in {}...",
                     if refresh_seconds > 60 {
-                        format!("{} minutes", refresh_seconds / 60)
+                        format!(
+                            "{}:{}",
+                            format!("{}m", refresh_seconds / 60).cyan(),
+                            format!("{}s", refresh_seconds % 60).cyan()
+                        )
                     } else {
-                        format!("{} seconds", refresh_seconds)
+                        format!("{}s", format!("{}", refresh_seconds).cyan())
                     }
                 );
 
