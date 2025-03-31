@@ -2,7 +2,7 @@ use chrono::{Local, Timelike};
 use colored::Colorize;
 use expression::backends::get_backend;
 use expression::config::Config;
-use expression::utils::wallpaper;
+use expression::utils::{calc, wallpaper};
 use log::{debug, error, info, warn};
 use std::{
     thread,
@@ -37,8 +37,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let start = Instant::now();
         let now = Local::now();
-        let seconds = now.second();
-        let minute = now.minute();
         let hour = now.hour() as u8;
         debug!(
             "Current Time: {}",
@@ -153,13 +151,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // (entries.len() / 24) for spaced out
 
         // Wait: 24 Hour Cycle Strategy
-        let refresh_time = 60; // Minutes
-        let remaining_seconds = 60 - seconds;
-        let wait_minutes = refresh_time - (minute % refresh_time) - 1; // -1 for calculating current remaining_seconds
-        let wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
+        let interval = 60; // Minutes
+        let wait_seconds = calc::wait_time(interval, now);
         info!(
             "Waiting for {} minutes and {} seconds",
-            wait_minutes, remaining_seconds
+            wait_seconds / 60,
+            wait_seconds % 60
         );
 
         // TODO: Move this to config
@@ -168,9 +165,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Refresh: T/2 Strategy
         // Re-calculates refresh time every T/2 seconds
         // Mitigates the Sleep/Hibernate issue to an extent without much wakeup calls
+        // Time : Max Polling Rate [log2(refresh_seconds)]
+        // 1m  : 6     |    1h  : 12
+        // 2m  : 7     |    2h  : 13
+        // 4m  : 8     |    4h  : 14
+        // 8m  : 9     |    8h  : 15
+        // 16m : 10    |    16h : 16
+        // 32m : 11    |    32h : 17
         if refresh_strategy == "T/2" {
             let mut refresh_seconds = wait_seconds;
-            debug!("-------------------------------------");
             while refresh_seconds > 1 {
                 refresh_seconds /= 2;
 
@@ -194,36 +197,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 thread::sleep(Duration::from_secs(refresh_seconds));
 
-                let start_calc = Instant::now();
-
                 // Re-calculate refresh time
-                let now = Local::now();
-                let seconds = now.second();
-                let minute = now.minute();
-                let new_hour = now.hour() as u8;
-                // new_hour > hour = next hour
-                // new_hour < hour = next day (midnight)
-                if new_hour != hour {
-                    debug!("Hour Changed: {}", new_hour);
+                let new_now = Local::now();
+                let (is_hour_changed, new_wait_seconds) =
+                    calc::refresh_time(interval, now, new_now);
+
+                if is_hour_changed {
+                    debug!("Hour Changed: {}", new_now.hour());
                     break;
                 }
-                let remaining_seconds = 60 - seconds;
-                let wait_minutes = refresh_time - (minute % refresh_time) - 1;
-                let new_wait_seconds: u64 = ((wait_minutes * 60) + remaining_seconds).into();
                 refresh_seconds = new_wait_seconds;
                 // Edge Case - would never happen as loop already breaks on next hour
                 // new_wait_seconds would almost be similar to refresh_seconds
                 // because new_wait_seconds = prev refresh_seconds / 2
-                /* if new_wait_seconds < refresh_seconds {
+                /* if new_wait_seconds < ori_refresh_seconds {
                     refresh_seconds = new_wait_seconds;
                 } */
-                debug!(
-                    "Recalculation Time: {}",
-                    format!("{:?}", start_calc.elapsed()).cyan()
-                );
             }
-            debug!("-------------------------------------");
-            thread::sleep(Duration::from_secs(1));
         }
         // Refresh: T Strategy
         // Simply waits until next wallpaper refresh time
