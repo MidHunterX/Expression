@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let special_entries_map = config.special_entries;
     let special_entries_enabled = config.general.enable_special;
-    let sub_collection_enabled = config.general.enable_sub_collection;
+    let groups_enabled = config.general.enable_groups;
 
     let mut selected_wallpaper = String::new();
 
@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 match entry {
                                     // SPECIAL GROUP
                                     wallpaper::WallpaperEntry::Directory(path) => {
-                                        if !sub_collection_enabled {
+                                        if !groups_enabled {
                                             continue;
                                         }
                                         // Selection: Random Strategy
@@ -112,7 +112,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match entry {
                         // WALLPAPER GROUP
                         wallpaper::WallpaperEntry::Directory(path) => {
-                            if !sub_collection_enabled {
+                            if !groups_enabled {
                                 continue;
                             }
                             // Selection: Random Strategy

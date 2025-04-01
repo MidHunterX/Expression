@@ -1,7 +1,7 @@
 [general]
 backend = "swww"
 enable_special = true
-enable_sub_collection = true
+enable_groups = true
 
 [directories]
 wallpaper = "/path/to/wallpapers"
