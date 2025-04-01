@@ -43,33 +43,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         selected_wallpaper.clear();
 
         // TODO: Collection: Theme Override Strategy
-        let collections = wallpaper::get_collections(wallpaper_dir)?;
+        /* let collections = wallpaper::get_collections(wallpaper_dir)?;
         for collection in collections {
             println!("collection: {}", collection.display());
-        }
+        } */
 
         // TODO: Randomized Scope Strategy
 
         // NOTE: Collection: Special Strategy
         if selected_wallpaper.is_empty() && special_entries_enabled {
-            let special_entries = wallpaper::get_wallpapers(special_dir, extensions);
+            let special_entries = wallpaper::get_special_entries(special_dir, extensions);
             match special_entries {
-                Ok(entries) => {
+                Ok(entries_map) => {
                     if let Some(filename) = special_entries_map.get(&hour.to_string()) {
-                        if let Some(matching_path) = entries.iter().find(|path| {
-                            path.file_stem()
-                                .and_then(|s| s.to_str())
-                                .map(|s| s == filename)
-                                .unwrap_or(false)
-                        }) {
-                            info!(
-                                "Selected Special: {}",
-                                matching_path
-                                    .file_name()
-                                    .and_then(|s| s.to_str())
-                                    .unwrap_or("Unknown")
-                            );
-                            selected_wallpaper = matching_path.display().to_string();
+                        if let Some(entry_vector) = entries_map.get(filename) {
+                            for entry in entry_vector {
+                                match entry {
+                                    // SPECIAL GROUP
+                                    wallpaper::WallpaperEntry::Directory(path) => {
+                                        if !sub_collection_enabled {
+                                            continue;
+                                        }
+                                        // Selection: Random Strategy
+                                        let sub_collection_dir = path.display().to_string();
+                                        let sub_entries = wallpaper::get_wallpapers(
+                                            &sub_collection_dir,
+                                            extensions,
+                                        )?;
+                                        let wallpaper_index =
+                                            rand::random_range(0..sub_entries.len());
+                                        selected_wallpaper =
+                                            sub_entries[wallpaper_index].display().to_string();
+                                        info!(
+                                            "Selected Special: [{}/{}] {}",
+                                            wallpaper_index,
+                                            sub_entries.len(),
+                                            selected_wallpaper.split('/').last().unwrap()
+                                        );
+                                        break;
+                                    }
+                                    // SPECIAL ENTRY
+                                    wallpaper::WallpaperEntry::File(path) => {
+                                        // Selection: Fixed Time Strategy
+                                        selected_wallpaper = path.display().to_string();
+                                        info!(
+                                            "Selected Special: {}",
+                                            selected_wallpaper.split('/').last().unwrap()
+                                        );
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }

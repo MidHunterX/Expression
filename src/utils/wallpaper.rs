@@ -81,27 +81,6 @@ pub enum WallpaperEntry {
 /// Returns BTreeMap with Vec of entries (sub-collections before files) for each hour.
 ///
 /// If `time_filter` is provided, entries older than the given hour (0-23) are excluded.
-///
-/// ### Example
-/// ```ignore
-/// let path = "/path/to/collection";
-/// let extensions = &["jpg", "png"];
-///
-/// let entries_map = get_wallpaper_entries(path, extensions, None)?;
-///
-/// for entry_vec in entries_map.values() {
-///     for entry in entry_vec {
-///         match entry {
-///             wallpaper::WallpaperEntry::Directory(path) => {
-///                 println!("dir : {}", path.display());
-///             }
-///             wallpaper::WallpaperEntry::File(path) => {
-///                 println!("file: {}", path.display());
-///             }
-///         }
-///     }
-/// }
-/// ```
 pub fn get_wallpaper_entries(
     wallpaper_dir: &str,
     supported_extensions: &[&str],
@@ -158,6 +137,59 @@ pub fn get_wallpaper_entries(
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
             format!("No wallpaper entries found in: {}", wallpaper_dir),
+        ));
+    }
+
+    Ok(wallpaper_map)
+}
+
+/// Retrieves all special objects (both entries and groups) from a directory.
+///
+/// Special objects can have any name.
+/// It collects directories and files with supported extensions.
+/// Returns BTreeMap with Vec of entries (sub-collections before files) for each objects.
+pub fn get_special_entries(
+    special_dir: &str,
+    supported_extensions: &[&str],
+) -> Result<BTreeMap<String, Vec<WallpaperEntry>>, io::Error> {
+    let entries = fs::read_dir(special_dir)?;
+    let mut wallpaper_map: BTreeMap<String, Vec<WallpaperEntry>> = BTreeMap::new();
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let filename = path.file_stem().and_then(|name| name.to_str()).map(String::from);
+
+        if let Some(filename) = filename {
+            let entry_type = if path.is_dir() {
+                WallpaperEntry::Directory(path)
+            } else if path.is_file() {
+                if let Some(ext) = path.extension().and_then(|ext| ext.to_str()) {
+                    if supported_extensions.contains(&ext) {
+                        WallpaperEntry::File(path)
+                    } else {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+            } else {
+                continue;
+            };
+
+            // BTreeMap: dir b4 file
+            let list = wallpaper_map.entry(filename).or_insert_with(Vec::new);
+            if matches!(entry_type, WallpaperEntry::Directory(_)) {
+                list.insert(0, entry_type); // Push directory to front
+            } else {
+                list.push(entry_type);
+            }
+        }
+    }
+
+    if wallpaper_map.is_empty() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("No special entries found in: {}", special_dir),
         ));
     }
 
