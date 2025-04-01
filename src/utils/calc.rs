@@ -7,7 +7,7 @@ use chrono::{DateTime, Local, Timelike};
 /// # Examples
 ///
 /// ```rust
-/// use chrono::{DateTime, Local, TimeZone};
+/// use chrono::{Local, TimeZone};
 /// use expression::utils::calc::wait_time;
 ///
 /// let interval = 60; // 1 hour
