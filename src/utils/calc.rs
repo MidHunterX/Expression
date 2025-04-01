@@ -67,3 +67,65 @@ pub fn refresh_time(
 
     return (is_hour_changed, new_wait_seconds);
 }
+
+// █▀█ █▀▀ █▀▀ █▀█ █▀▀ █▀ █░█
+// █▀▄ ██▄ █▀░ █▀▄ ██▄ ▄█ █▀█
+
+use colored::Colorize;
+use log::debug;
+use std::{thread, time::Duration};
+
+/// Refresh: T Strategy
+/// Simply waits until next wallpaper refresh time
+pub fn sleep(wait_seconds: u64) {
+    thread::sleep(Duration::from_secs(wait_seconds));
+}
+
+/// Refresh: T/2 Strategy
+/// Re-calculates refresh time every T/2 seconds
+/// Mitigates the Sleep/Hibernate issue to an extent without much wakeup calls
+/// Time : Max Polling Rate [log2(refresh_seconds)]
+/// 1m  : 6     |    1h  : 12
+/// 2m  : 7     |    2h  : 13
+/// 4m  : 8     |    4h  : 14
+/// 8m  : 9     |    8h  : 15
+/// 16m : 10    |    16h : 16
+/// 32m : 11    |    32h : 17
+pub fn refresh_t2(interval: u32, now: DateTime<Local>, wait_seconds: u64) {
+    let mut ori_refresh_seconds = wait_seconds;
+    let mut refresh_seconds = wait_seconds;
+
+    while refresh_seconds > 1 {
+        refresh_seconds /= 2;
+
+        debug!(
+            "Recalculating in {}...",
+            if refresh_seconds > 60 {
+                format!(
+                    "{} {}",
+                    format!("{}m", refresh_seconds / 60).cyan(),
+                    format!("{}s", refresh_seconds % 60).cyan()
+                )
+            } else {
+                format!("{}s", format!("{}", refresh_seconds).cyan())
+            }
+        );
+
+        sleep(refresh_seconds);
+
+        // Re-calculate refresh time
+        let new_now = Local::now();
+        let (is_hour_changed, new_wait_seconds) = refresh_time(interval, now, new_now);
+
+        if is_hour_changed {
+            debug!("Hour Changed: {}", new_now.hour());
+            break;
+        }
+
+        if new_wait_seconds < ori_refresh_seconds {
+            refresh_seconds = new_wait_seconds;
+            ori_refresh_seconds = new_wait_seconds;
+        }
+    }
+    sleep(1);
+}
