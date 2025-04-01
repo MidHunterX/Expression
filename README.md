@@ -2,9 +2,8 @@
 
 ## Overview
 
-Expression is a highly efficient, wallpaper selector designed for **Algorithm
-based wallpaper selection and Power efficiency**. If you have a bash script to
-set wallpapers throughout the day, this is exactly that but better.
+Expression is an algorithm based highly efficient, wallpaper selector designed
+for power efficiency.
 
 ## Installation
 
