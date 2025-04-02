@@ -157,7 +157,10 @@ pub fn get_special_entries(
 
     for entry in entries.flatten() {
         let path = entry.path();
-        let filename = path.file_stem().and_then(|name| name.to_str()).map(String::from);
+        let filename = path
+            .file_stem()
+            .and_then(|name| name.to_str())
+            .map(String::from);
 
         if let Some(filename) = filename {
             let entry_type = if path.is_dir() {
@@ -194,4 +197,23 @@ pub fn get_special_entries(
     }
 
     Ok(wallpaper_map)
+}
+
+// █▀ █▀▀ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
+// ▄█ ██▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
+
+/// Selects a random wallpaper from a wallpaper Group.
+/// Returns a tuple of (path, index, total)
+pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(String, usize, usize)> {
+    // Selection: Random Strategy
+    let sub_collection_dir = path.display().to_string();
+    let sub_entries = get_wallpapers(&sub_collection_dir, extensions).ok()?;
+    if sub_entries.is_empty() {
+        return None; // Avoid panic if empty
+    }
+
+    let wallpaper_index = rand::random_range(0..sub_entries.len());
+    let selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
+
+    Some((selected_wallpaper, wallpaper_index, sub_entries.len()))
 }

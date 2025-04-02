@@ -65,22 +65,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                             continue;
                                         }
                                         // Selection: Random Strategy
-                                        let sub_collection_dir = path.display().to_string();
-                                        let sub_entries = wallpaper::get_wallpapers(
-                                            &sub_collection_dir,
-                                            extensions,
-                                        )?;
-                                        let wallpaper_index =
-                                            rand::random_range(0..sub_entries.len());
-                                        selected_wallpaper =
-                                            sub_entries[wallpaper_index].display().to_string();
-                                        info!(
-                                            "Selected Special: [{}/{}] {}",
-                                            wallpaper_index,
-                                            sub_entries.len(),
-                                            selected_wallpaper.split('/').last().unwrap()
-                                        );
-                                        break;
+                                        if let Some((entry, index, total)) =
+                                            wallpaper::select_random_entry(path, extensions)
+                                        {
+                                            selected_wallpaper = entry;
+                                            info!(
+                                                "Selected Special: [{}/{}] {}",
+                                                index,
+                                                total,
+                                                selected_wallpaper.split('/').last().unwrap()
+                                            );
+                                            break;
+                                        }
+                                        // TODO: Selection: Spaced Out Strategy
                                     }
                                     // SPECIAL ENTRY
                                     wallpaper::WallpaperEntry::File(path) => {
@@ -116,18 +113,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 continue;
                             }
                             // Selection: Random Strategy
-                            let sub_collection_dir = path.display().to_string();
-                            let sub_entries =
-                                wallpaper::get_wallpapers(&sub_collection_dir, extensions)?;
-                            let wallpaper_index = rand::random_range(0..sub_entries.len());
-                            selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
-                            info!(
-                                "Selected Wallpaper: [{}/{}] {}",
-                                wallpaper_index,
-                                sub_entries.len(),
-                                selected_wallpaper.split('/').last().unwrap()
-                            );
-                            break;
+                            if let Some((entry, index, total)) =
+                                wallpaper::select_random_entry(path, extensions)
+                            {
+                                selected_wallpaper = entry;
+                                info!(
+                                    "Selected Wallpaper: [{}/{}] {}",
+                                    index,
+                                    total,
+                                    selected_wallpaper.split('/').last().unwrap()
+                                );
+                                break;
+                            }
                         }
                         // WALLPAPER ENTRY
                         wallpaper::WallpaperEntry::File(path) => {
