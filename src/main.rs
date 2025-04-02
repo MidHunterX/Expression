@@ -27,7 +27,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let special_entries_map = config.special_entries;
     let special_entries_enabled = config.general.enable_special;
-    let groups_enabled = config.general.enable_groups;
 
     let mut selected_wallpaper = String::new();
 
@@ -50,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // TODO: Randomized Scope Strategy
 
-        // NOTE: Collection: Special Strategy
+        // COLLECTION: Special Collection
         if selected_wallpaper.is_empty() && special_entries_enabled {
             let special_entries = wallpaper::get_special_entries(special_dir, extensions);
             match special_entries {
@@ -61,9 +60,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 match entry {
                                     // SPECIAL GROUP
                                     wallpaper::WallpaperEntry::Directory(path) => {
-                                        if !groups_enabled {
-                                            continue;
-                                        }
                                         // Selection: Random Strategy
                                         if let Some((entry, index, total)) =
                                             wallpaper::select_random_entry(path, extensions)
@@ -100,7 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
-        // NOTE: Collection: Fixed Time Strategy
+        // COLLECTION: Normal Collection
         if selected_wallpaper.is_empty() {
             let entries_map =
                 wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
@@ -109,9 +105,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match entry {
                         // WALLPAPER GROUP
                         wallpaper::WallpaperEntry::Directory(path) => {
-                            if !groups_enabled {
-                                continue;
-                            }
                             // Selection: Random Strategy
                             if let Some((entry, index, total)) =
                                 wallpaper::select_random_entry(path, extensions)

@@ -49,7 +49,6 @@ Options marked with `#` are optional.
 [general]
 backend = "swww"
 # enable_special = true
-# enable_sub_collection = true
 
 [directories]
 wallpaper = "~/Pictures/wallpaper_dir"
