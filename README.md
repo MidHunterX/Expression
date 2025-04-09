@@ -41,23 +41,37 @@ Expression uses a TOML configuration file located at:
 ~/.config/expression/config.toml
 ```
 
-#### Example Config
-
-Options marked with `#` are optional.
+#### Minimal Config
 
 ```toml
 [general]
 backend = "swww"
-# enable_special = true
 
 [directories]
 wallpaper = "~/Pictures/wallpaper_dir"
-# special = "~/Pictures/Wallpapers/Special"
+```
 
-# [special_entries]
-# 5 = "rise and shine"
-# 9 = "workout_motivation"
-# 23 = "sleep_time"
+#### Full Config
+
+```toml
+[general]
+# Supported backends: swww, feh
+backend = "swww"
+# Enable/Disable special collection feature
+enable_special = true
+
+[directories]
+# Default wallpaper directory
+wallpaper = "~/Pictures/wallpaper_dir"
+# Override special wallpaper directory (default: wallpaper_dir/special)
+special = "~/Pictures/Wallpapers/Special"
+
+[special_entries]
+# Wallpaper item (entry/group) names situated inside special collection along with their corresponding hour
+# These special wallpaper items always take precedence over other wallpaper items
+5 = "rise and shine"
+9 = "workout_motivation"
+23 = "sleep_time"
 ```
 
 ## Introduction && Features
