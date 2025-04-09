@@ -65,10 +65,10 @@ wallpaper = "~/Pictures/wallpaper_dir"
 It works by treating wallpapers as a single object; whether is is a file or
 multiple files grouped into a directory.
 
-### Wallpaper Objects
+### Wallpaper Items
 
-- **Wallpaper Entry** – A single wallpaper file named after the hour (e.g., `07.jpg`).
-- **Wallpaper Group** – A folder containing multiple wallpapers, named after the hour (e.g., `07/`).
+- **Entry** – A single wallpaper file named after the hour (e.g., `07.jpg`).
+- **Group** – A folder containing multiple wallpapers, named after the hour (e.g., `07/`).
 
 ```
 wallpaper_dir/

@@ -106,7 +106,7 @@ fn test_get_wallpaper_entries() -> io::Result<()> {
     setup_test_dir(&test_dir, &["00.jpg", "12.png", "23.jpeg"], &["10", "20"])?;
 
     let entries =
-        wallpaper::get_wallpaper_entries(test_dir.to_str().unwrap(), &["jpg", "png"], None)?;
+        wallpaper::get_wallpaper_items(test_dir.to_str().unwrap(), &["jpg", "png"], None)?;
 
     assert_eq!(
         entries.len(),
@@ -125,7 +125,7 @@ fn test_get_wallpaper_entries_with_filter() -> io::Result<()> {
     setup_test_dir(&test_dir, &["00.jpg", "12.png", "23.jpg"], &[])?;
 
     let entries =
-        wallpaper::get_wallpaper_entries(test_dir.to_str().unwrap(), &["jpg", "png"], Some(12))?;
+        wallpaper::get_wallpaper_items(test_dir.to_str().unwrap(), &["jpg", "png"], Some(12))?;
 
     assert_eq!(
         entries.len(),

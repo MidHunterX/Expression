@@ -25,8 +25,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let wallpaper_dir = config.directories.wallpaper.as_str();
     // Don't worry, JFK won't get executed here because defaults come from config
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
-    let special_entries_map = config.special_entries;
-    let special_entries_enabled = config.general.enable_special;
+    let config_special_entries = config.special_entries;
+    let config_special_enabled = config.general.enable_special;
 
     let mut selected_wallpaper = String::new();
 
@@ -50,14 +50,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // TODO: Randomized Scope Strategy
 
         // COLLECTION: Special Collection
-        if selected_wallpaper.is_empty() && special_entries_enabled {
-            let special_entries = wallpaper::get_special_entries(special_dir, extensions);
-            match special_entries {
-                Ok(entries_map) => {
-                    if let Some(filename) = special_entries_map.get(&hour.to_string()) {
-                        if let Some(entry_vector) = entries_map.get(filename) {
+        if selected_wallpaper.is_empty() && config_special_enabled {
+            let special_items_result = wallpaper::get_special_items(special_dir, extensions);
+            match special_items_result {
+                Ok(special_items) => {
+                    if let Some(filename) = config_special_entries.get(&hour.to_string()) {
+                        if let Some(item) = special_items.get(filename) {
                             info!("Special Collection Activated!");
-                            selected_wallpaper = wallpaper::select_wallpaper(entry_vector, extensions);
+                            selected_wallpaper = wallpaper::select_wallpaper(item, extensions);
                         }
                     }
                 }
@@ -69,10 +69,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // COLLECTION: Normal Collection
         if selected_wallpaper.is_empty() {
-            let entries_map =
-                wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
-            if let Some(entry_vector) = entries_map.get(&hour) {
-                selected_wallpaper = wallpaper::select_wallpaper(entry_vector, extensions);
+            let items = wallpaper::get_wallpaper_items(wallpaper_dir, extensions, Some(hour))?;
+            if let Some(item) = items.get(&hour) {
+                selected_wallpaper = wallpaper::select_wallpaper(item, extensions);
             }
         }
 

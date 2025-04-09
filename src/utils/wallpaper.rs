@@ -3,10 +3,15 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 
+pub enum WallpaperItem {
+    Entry(PathBuf),
+    Group(PathBuf),
+}
+
 /// Get all wallpapers with supported extensions in a directory
 /// - Returns a vector of file paths regardless of filename
 /// - Useful for getting all wallpapers in a sub-collection
-///   as sub-collections might contain unstructured filenames
+///   as groups might contain unstructured filenames
 pub fn get_wallpapers(
     wallpaper_dir: &str,
     supported_extensions: &[&str],
@@ -38,7 +43,7 @@ pub fn get_wallpapers(
 }
 
 /// Get all collections in a directory
-/// - Collections are directories which are not sub-collections (HH)
+/// - Collections are directories which are not groups (HH)
 /// - So, any directories with names other than HH are considered collections
 /// - Collections e.g. `Dark_Mode/`, `Nature/`, `Light_Mode/`, etc
 pub fn get_collections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error> {
@@ -69,27 +74,22 @@ pub fn get_collections(wallpaper_dir: &str) -> Result<Vec<PathBuf>, io::Error> {
     Ok(directories)
 }
 
-pub enum WallpaperEntry {
-    File(PathBuf),
-    Directory(PathBuf),
-}
-
-/// Retrieves all wallpaper entries (both files and sub-collections) from a directory.
+/// Retrieves all wallpaper items (includes entries and groups) from a directory.
 ///
-/// Entries must be formatted as `HH` (e.g., `05`, `12`, `23`).
+/// Items must be formatted as `HH` (e.g., `05`, `12`, `23`).
 /// It collects directories named after hours and files with supported extensions.
-/// Returns BTreeMap with Vec of entries (sub-collections before files) for each hour.
+/// Returns BTreeMap with Vec of items (groups before entries) for each hour.
 ///
-/// If `time_filter` is provided, entries older than the given hour (0-23) are excluded.
-pub fn get_wallpaper_entries(
+/// If `time_filter` is provided, items older than the given hour (0-23) are excluded.
+pub fn get_wallpaper_items(
     wallpaper_dir: &str,
     supported_extensions: &[&str],
     time_filter: Option<u8>,
     // NOTE: Using BTreeMap instead of HashMap to auto sort entries by key
     // Sorting HashMap is less efficient
-) -> Result<BTreeMap<u8, Vec<WallpaperEntry>>, io::Error> {
+) -> Result<BTreeMap<u8, Vec<WallpaperItem>>, io::Error> {
     let entries = fs::read_dir(wallpaper_dir)?;
-    let mut wallpaper_map: BTreeMap<u8, Vec<WallpaperEntry>> = BTreeMap::new();
+    let mut wallpaper_map: BTreeMap<u8, Vec<WallpaperItem>> = BTreeMap::new();
 
     for entry in entries.flatten() {
         // NOTE: .flatten() auto skips failed results
@@ -102,11 +102,11 @@ pub fn get_wallpaper_entries(
                     continue;
                 }
                 let entry_type = if path.is_dir() {
-                    WallpaperEntry::Directory(path)
+                    WallpaperItem::Group(path)
                 } else if path.is_file() {
                     if let Some(ext) = path.extension().and_then(|ext| ext.to_str()) {
                         if supported_extensions.contains(&ext) {
-                            WallpaperEntry::File(path)
+                            WallpaperItem::Entry(path)
                         } else {
                             continue;
                         }
@@ -119,7 +119,7 @@ pub fn get_wallpaper_entries(
 
                 // BTreeMap: dir b4 file
                 let list = wallpaper_map.entry(hour).or_insert_with(Vec::new);
-                if matches!(entry_type, WallpaperEntry::Directory(_)) {
+                if matches!(entry_type, WallpaperItem::Group(_)) {
                     list.insert(0, entry_type); // Push directory to front
                 } else {
                     list.push(entry_type);
@@ -143,17 +143,17 @@ pub fn get_wallpaper_entries(
     Ok(wallpaper_map)
 }
 
-/// Retrieves all special objects (both entries and groups) from a directory.
+/// Retrieves all special items (both entries and groups) from a directory.
 ///
-/// Special objects can have any name.
+/// Special items can have any name.
 /// It collects directories and files with supported extensions.
-/// Returns BTreeMap with Vec of entries (sub-collections before files) for each objects.
-pub fn get_special_entries(
+/// Returns BTreeMap with Vec of entries (groups before entries) for each items.
+pub fn get_special_items(
     special_dir: &str,
     supported_extensions: &[&str],
-) -> Result<BTreeMap<String, Vec<WallpaperEntry>>, io::Error> {
+) -> Result<BTreeMap<String, Vec<WallpaperItem>>, io::Error> {
     let entries = fs::read_dir(special_dir)?;
-    let mut wallpaper_map: BTreeMap<String, Vec<WallpaperEntry>> = BTreeMap::new();
+    let mut wallpaper_map: BTreeMap<String, Vec<WallpaperItem>> = BTreeMap::new();
 
     for entry in entries.flatten() {
         let path = entry.path();
@@ -164,11 +164,11 @@ pub fn get_special_entries(
 
         if let Some(filename) = filename {
             let entry_type = if path.is_dir() {
-                WallpaperEntry::Directory(path)
+                WallpaperItem::Group(path)
             } else if path.is_file() {
                 if let Some(ext) = path.extension().and_then(|ext| ext.to_str()) {
                     if supported_extensions.contains(&ext) {
-                        WallpaperEntry::File(path)
+                        WallpaperItem::Entry(path)
                     } else {
                         continue;
                     }
@@ -181,7 +181,7 @@ pub fn get_special_entries(
 
             // BTreeMap: dir b4 file
             let list = wallpaper_map.entry(filename).or_insert_with(Vec::new);
-            if matches!(entry_type, WallpaperEntry::Directory(_)) {
+            if matches!(entry_type, WallpaperItem::Group(_)) {
                 list.insert(0, entry_type); // Push directory to front
             } else {
                 list.push(entry_type);
@@ -221,11 +221,10 @@ pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(Strin
 }
 
 /// Selects a wallpaper from Wallpaper Object (entry/group)
-pub fn select_wallpaper(entry_vector: &Vec<WallpaperEntry>, extensions: &[&str]) -> String {
+pub fn select_wallpaper(entry_vector: &Vec<WallpaperItem>, extensions: &[&str]) -> String {
     for entry in entry_vector {
         match entry {
-            // WALLPAPER GROUP
-            WallpaperEntry::Directory(path) => {
+            WallpaperItem::Group(path) => {
                 // Random Strategy
                 if let Some((entry, index, total)) = select_random_entry(path, extensions) {
                     info!(
@@ -237,8 +236,8 @@ pub fn select_wallpaper(entry_vector: &Vec<WallpaperEntry>, extensions: &[&str])
                     return entry;
                 }
             }
-            // WALLPAPER ENTRY
-            WallpaperEntry::File(path) => {
+
+            WallpaperItem::Entry(path) => {
                 // Fixed Time Strategy
                 let selected_wallpaper = path.display().to_string();
                 info!(
