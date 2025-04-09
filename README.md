@@ -1,11 +1,11 @@
 # Expression
 
-## Overview
+Expression is a lightweight and highly efficient wallpaper auto-selector,
+optimized for minimal system resource usage. Designed with performance and
+customizability in mind, it selects wallpapers based on hour and user-defined
+rules.
 
-Expression is an algorithm based highly efficient, wallpaper selector designed
-for power efficiency.
-
-## Installation
+## 🚀 Installation
 
 ### Prerequisites
 
@@ -19,7 +19,7 @@ cargo build --release
 cp target/release/expression ~/.local/bin/
 ```
 
-## Usage
+## 👟 Usage
 
 Run Expression as a daemon:
 
@@ -33,7 +33,7 @@ Run Expression with debug logs:
 RUST_LOG=debug expression
 ```
 
-### Configuration
+## 🔧 Configuration
 
 Expression uses a TOML configuration file located at:
 
@@ -41,7 +41,7 @@ Expression uses a TOML configuration file located at:
 ~/.config/expression/config.toml
 ```
 
-#### Minimal Config
+### Minimal Config
 
 ```toml
 [general]
@@ -51,7 +51,7 @@ backend = "swww"
 wallpaper = "~/Pictures/wallpaper_dir"
 ```
 
-#### Full Config
+### Full Config
 
 ```toml
 [general]
@@ -74,7 +74,7 @@ special = "~/Pictures/Wallpapers/Special"
 23 = "sleep_time"
 ```
 
-## Introduction && Features
+## 📚 Concepts
 
 It works by treating wallpapers as a single object; whether is is a file or
 multiple files grouped into a directory.
@@ -135,7 +135,7 @@ wallpaper_dir/
 
 > Wallpaper Objects in Special Collection has the highest priority over everything.
 
-#### Special Collection
+### Special Collection
 
 **Definition**: Collection dir which has the highest priority when selecting wallpapers.
 
@@ -159,19 +159,10 @@ special = "~/Pictures/Wallpapers/Special/"
 23 = "sleep_time"
 ```
 
-## Wallpaper Selection Strategies
-
-Expression intelligently selects wallpapers based on the following strategies:
-
-- **Fixed Time Strategy** – Assigns wallpapers to specific hours.
-- **Spaced Out Time Strategy** – Evenly distributes wallpapers across time blocks.
-- **Random Selection Strategy** – Chooses from available wallpapers at random.
-- **Special Collection Strategy** – Overrides with high-priority special wallpapers.
-
-## License
+## 📜 License
 
 Expression is licensed under the **GNU Affero GPL v3**, ensuring all modifications and server-hosted versions remain open-source.
 
-## Contributing
+## 🙌 Contributing
 
 Contributions are welcome! Feel free to submit issues or pull requests.
