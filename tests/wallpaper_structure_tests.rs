@@ -1,29 +1,11 @@
 use expression::utils::wallpaper;
 use std::fs;
 use std::io;
-use std::path::Path;
+mod utils;
+use utils::{cleanup_test_dir, setup_test_dir};
 
-fn setup_test_dir(root: &Path, files: &[&str], dirs: &[&str]) -> io::Result<()> {
-    fs::create_dir_all(root)?;
-    for file in files {
-        let file_path = root.join(file);
-        fs::write(file_path, "test")?;
-    }
-    for dir in dirs {
-        let dir_path = root.join(dir);
-        fs::create_dir_all(dir_path)?;
-    }
-    Ok(())
-}
-
-fn cleanup_test_dir(root: &Path) {
-    if root.exists() {
-        fs::remove_dir_all(root).ok();
-    }
-}
-
-// █░█░█ ▄▀█ █░░ █░░ █▀█ ▄▀█ █▀█ █▀▀ █▀█ █▀
-// ▀▄▀▄▀ █▀█ █▄▄ █▄▄ █▀▀ █▀█ █▀▀ ██▄ █▀▄ ▄█
+// █░█░█ ▄▀█ █░░ █░░ █▀█ ▄▀█ █▀█ █▀▀ █▀█
+// ▀▄▀▄▀ █▀█ █▄▄ █▄▄ █▀▀ █▀█ █▀▀ ██▄ █▀▄
 
 #[test]
 fn test_get_wallpapers() -> io::Result<()> {
@@ -57,8 +39,8 @@ fn test_get_wallpapers_empty() {
     cleanup_test_dir(&test_dir);
 }
 
-// █▀▀ █▀█ █░░ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█ █▀
-// █▄▄ █▄█ █▄▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█ ▄█
+// █▀▀ █▀█ █░░ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
+// █▄▄ █▄█ █▄▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
 
 #[test]
 fn test_get_collections() -> io::Result<()> {
@@ -96,39 +78,34 @@ fn test_get_collections_empty() {
     cleanup_test_dir(&test_dir);
 }
 
-// █▀▀ █▄░█ ▀█▀ █▀█ █ █▀▀ █▀
-// ██▄ █░▀█ ░█░ █▀▄ █ ██▄ ▄█
+// █ ▀█▀ █▀▀ █▀▄▀█
+// █ ░█░ ██▄ █░▀░█
 
 #[test]
-fn test_get_wallpaper_entries() -> io::Result<()> {
-    let test_dir = std::env::temp_dir().join("test_get_wallpaper_entries");
+fn test_get_wallpaper_items() -> io::Result<()> {
+    let test_dir = std::env::temp_dir().join("test_get_wallpaper_items");
     cleanup_test_dir(&test_dir);
     setup_test_dir(&test_dir, &["00.jpg", "12.png", "23.jpeg"], &["10", "20"])?;
 
-    let entries =
-        wallpaper::get_wallpaper_items(test_dir.to_str().unwrap(), &["jpg", "png"], None)?;
+    let items = wallpaper::get_wallpaper_items(test_dir.to_str().unwrap(), &["jpg", "png"], None)?;
 
-    assert_eq!(
-        entries.len(),
-        4,
-        "Expected 4 wallpaper entries (files & dirs)"
-    );
+    assert_eq!(items.len(), 4, "Expected 4 wallpaper items (files & dirs)");
 
     cleanup_test_dir(&test_dir);
     Ok(())
 }
 
 #[test]
-fn test_get_wallpaper_entries_with_filter() -> io::Result<()> {
-    let test_dir = std::env::temp_dir().join("test_get_wallpaper_entries_filter");
+fn test_get_wallpaper_items_with_filter() -> io::Result<()> {
+    let test_dir = std::env::temp_dir().join("test_get_wallpaper_items_filter");
     cleanup_test_dir(&test_dir);
     setup_test_dir(&test_dir, &["00.jpg", "12.png", "23.jpg"], &[])?;
 
-    let entries =
+    let items =
         wallpaper::get_wallpaper_items(test_dir.to_str().unwrap(), &["jpg", "png"], Some(12))?;
 
     assert_eq!(
-        entries.len(),
+        items.len(),
         2,
         "Expected 2 wallpapers after filtering by hour"
     );
