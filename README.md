@@ -89,7 +89,7 @@ wallpaper_dir/
 
 ### Collections
 
-**Definition**: Directory with `non-numeric name` which contains Wallpaper Objects (Entry or Group).
+**Definition**: Directory with `non-numeric name` which contains Wallpaper Items (Entry or Group).
 
 By definition, `wallpaper_dir` itself is a Collection of Wallpapers as well.
 
@@ -123,7 +123,7 @@ wallpaper_dir/
 
 #### Special Collection
 
-**Definition**: Collection dir with `special` as its name.
+**Definition**: Collection dir which has the highest priority when selecting wallpapers.
 
 - By default `special` should be inside your wallpaper_dir
 - You can change its location by configuring `special` in `[directories]`
@@ -153,17 +153,6 @@ Expression intelligently selects wallpapers based on the following strategies:
 - **Spaced Out Time Strategy** – Evenly distributes wallpapers across time blocks.
 - **Random Selection Strategy** – Chooses from available wallpapers at random.
 - **Special Collection Strategy** – Overrides with high-priority special wallpapers.
-
-## Refresh Strategy and Sleep Handling
-
-- **T Strategy:** Waits until the next wallpaper refresh time. Most minimal cpu wake.
-- **T/2 Strategy:** Recalculates refresh time every `T/2` seconds to mitigate sleep/hibernate issues.
-
-## Roadmap
-
-- **ACPI Wake Handling** – Detect system wake-up and recalculate the next refresh.
-- **Smart Mood-Based Selection** – Dynamic wallpaper selection based on user context.
-- **Integration with HunterOS** – Unified configuration with other HunterOS components.
 
 ## License
 
