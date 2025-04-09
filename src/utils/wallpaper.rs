@@ -202,6 +202,8 @@ pub fn get_special_entries(
 // █▀ █▀▀ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
 // ▄█ ██▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
 
+use log::info;
+
 /// Selects a random wallpaper from a wallpaper Group.
 /// Returns a tuple of (path, index, total)
 pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(String, usize, usize)> {
@@ -216,4 +218,36 @@ pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(Strin
     let selected_wallpaper = sub_entries[wallpaper_index].display().to_string();
 
     Some((selected_wallpaper, wallpaper_index, sub_entries.len()))
+}
+
+/// Selects a wallpaper from Wallpaper Object (entry/group)
+pub fn select_wallpaper(entry_vector: &Vec<WallpaperEntry>, extensions: &[&str]) -> String {
+    for entry in entry_vector {
+        match entry {
+            // WALLPAPER GROUP
+            WallpaperEntry::Directory(path) => {
+                // Random Strategy
+                if let Some((entry, index, total)) = select_random_entry(path, extensions) {
+                    info!(
+                        "Selected Wallpaper: [{}/{}] {}",
+                        index,
+                        total,
+                        entry.split('/').last().unwrap()
+                    );
+                    return entry;
+                }
+            }
+            // WALLPAPER ENTRY
+            WallpaperEntry::File(path) => {
+                // Fixed Time Strategy
+                let selected_wallpaper = path.display().to_string();
+                info!(
+                    "Selected Wallpaper: {}",
+                    selected_wallpaper.split('/').last().unwrap()
+                );
+                return selected_wallpaper;
+            }
+        }
+    }
+    String::new()
 }

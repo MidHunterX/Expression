@@ -56,37 +56,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(entries_map) => {
                     if let Some(filename) = special_entries_map.get(&hour.to_string()) {
                         if let Some(entry_vector) = entries_map.get(filename) {
-                            for entry in entry_vector {
-                                match entry {
-                                    // SPECIAL GROUP
-                                    wallpaper::WallpaperEntry::Directory(path) => {
-                                        // Selection: Random Strategy
-                                        if let Some((entry, index, total)) =
-                                            wallpaper::select_random_entry(path, extensions)
-                                        {
-                                            selected_wallpaper = entry;
-                                            info!(
-                                                "Selected Special: [{}/{}] {}",
-                                                index,
-                                                total,
-                                                selected_wallpaper.split('/').last().unwrap()
-                                            );
-                                            break;
-                                        }
-                                        // TODO: Selection: Spaced Out Strategy
-                                    }
-                                    // SPECIAL ENTRY
-                                    wallpaper::WallpaperEntry::File(path) => {
-                                        // Selection: Fixed Time Strategy
-                                        selected_wallpaper = path.display().to_string();
-                                        info!(
-                                            "Selected Special: {}",
-                                            selected_wallpaper.split('/').last().unwrap()
-                                        );
-                                        break;
-                                    }
-                                }
-                            }
+                            info!("Special Collection Activated!");
+                            selected_wallpaper = wallpaper::select_wallpaper(entry_vector, extensions);
                         }
                     }
                 }
@@ -101,36 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let entries_map =
                 wallpaper::get_wallpaper_entries(wallpaper_dir, extensions, Some(hour))?;
             if let Some(entry_vector) = entries_map.get(&hour) {
-                for entry in entry_vector {
-                    match entry {
-                        // WALLPAPER GROUP
-                        wallpaper::WallpaperEntry::Directory(path) => {
-                            // Selection: Random Strategy
-                            if let Some((entry, index, total)) =
-                                wallpaper::select_random_entry(path, extensions)
-                            {
-                                selected_wallpaper = entry;
-                                info!(
-                                    "Selected Wallpaper: [{}/{}] {}",
-                                    index,
-                                    total,
-                                    selected_wallpaper.split('/').last().unwrap()
-                                );
-                                break;
-                            }
-                        }
-                        // WALLPAPER ENTRY
-                        wallpaper::WallpaperEntry::File(path) => {
-                            // Selection: Fixed Time Strategy
-                            selected_wallpaper = path.display().to_string();
-                            info!(
-                                "Selected Wallpaper: {}",
-                                selected_wallpaper.split('/').last().unwrap()
-                            );
-                            break;
-                        }
-                    }
-                }
+                selected_wallpaper = wallpaper::select_wallpaper(entry_vector, extensions);
             }
         }
 
