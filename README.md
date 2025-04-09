@@ -1,3 +1,5 @@
+![banner](./.github/expression_banner.jpg)
+
 # Expression
 
 Expression is a lightweight and highly efficient wallpaper auto-selector,
