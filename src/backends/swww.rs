@@ -26,9 +26,14 @@ impl Backend for SwwwBackend {
     }
 
     fn initialize(&self) -> Result<(), Box<dyn Error>> {
-        // Swwww can take a bit while to start
+        // CASE: swww already up and running
+        if Self::is_available() {
+            return Ok(());
+        }
+        // CASE: swww loading on startup
         for _ in 0..5 {
             if Self::is_available() {
+                sleep(Duration::from_secs(1));
                 return Ok(());
             }
             sleep(Duration::from_secs(1));
