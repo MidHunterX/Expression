@@ -13,6 +13,7 @@ rules.
 
 - Rust (Latest stable version)
 - A supported wallpaper setter (`swww`, `feh`)
+- Configuration file (`~/.config/expression/config.toml`)
 
 ### Build and Install
 
@@ -78,15 +79,15 @@ special = "~/Pictures/Wallpapers/Special"
 
 ## 📚 Concepts
 
-It works by treating wallpapers as a single object; whether is is a file or
-multiple files grouped into a directory.
+Expression works by treating wallpapers as a single unit; whether is is a file
+or multiple files grouped into a directory.
 
 ### Wallpaper Items
 
 - **Entry** – A single wallpaper file named after the hour (e.g., `07.jpg`).
 - **Group** – A folder containing multiple wallpapers, named after the hour (e.g., `07/`).
 
-```
+```sh
 wallpaper_dir/
 ├── 00.jpg      # Entry for midnight
 ├── 05.jpg      # Entry for 5:00
@@ -109,29 +110,29 @@ wallpaper_dir/
 
 By definition, `wallpaper_dir` itself is a Collection of Wallpapers as well.
 
-```
+```sh
 wallpaper_dir/
-│   special/      # Special Collection
+│   special/                    # Special Collection
 │   ├── rise and shine.gif
 │   ├── sleep_time.jpg
 │   └── workout_motivation.jpg
 │
-│   collection_1/ # Custom Collection
+│   collection_1/               # Custom Collection 1
 │   ├── 00/
 │   │   ├── Austrian Painter.png
 │   │   ├── Tiananmen Square.jpg
-│   │   ├── Who is in Paris.jpg
+│   │   ├── who_is_in_paris.jpg
 │   │   └── ...
 │   ├── 01.gif
 │   ├── 02.png
 │   └── ...
 │
-│   Nature Collection by Twice/ # Custom Collection
+│   Nature Collection by Twice/ # Custom Collection 2
 │   └── ...
 │
-├── 00.jpg      # Entry for midnight
-├── 05.jpg      # Entry for 5:00
-├── 07/         # Group for 7:00
+├── 00.jpg  # Entry for midnight
+├── 05.jpg  # Entry for 5:00
+├── 07/     # Group for 7:00
 └── ...
 ```
 
