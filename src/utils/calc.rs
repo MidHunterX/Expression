@@ -72,7 +72,7 @@ pub fn refresh_time(
 // █▀▄ ██▄ █▀░ █▀▄ ██▄ ▄█ █▀█
 
 use colored::Colorize;
-use log::debug;
+use log2::debug;
 use std::{thread, time::Duration};
 
 /// Refresh: T Strategy

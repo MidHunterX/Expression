@@ -202,7 +202,7 @@ pub fn get_special_items(
 // █▀ █▀▀ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
 // ▄█ ██▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
 
-use log::info;
+use log2::info;
 
 /// Selects a random wallpaper from a wallpaper Group.
 /// Returns a tuple of (path, index, total)

@@ -3,8 +3,8 @@ use colored::Colorize;
 use expression::backends::get_backend;
 use expression::config::Config;
 use expression::utils::{calc, wallpaper};
-use log::{debug, error, info, warn};
-use std::time::Instant;
+use log2::{debug, error, info, warn};
+use std::{path::PathBuf, time::Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
@@ -15,7 +15,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend_name = backend.name();
     let extensions = backend.supported_extensions();
 
-    env_logger::builder().format_timestamp(None).init();
+    // Log: File + Stdout Debug Logs
+    let logfile = dirs::state_dir()
+        .map(|path| path.join("expression/expression.log"))
+        .unwrap_or_else(|| PathBuf::from(""));
+    // let _log2 = log2::open(logfile.to_str().unwrap()).tee(true).start();
+    let _log2 = log2::open(logfile.to_str().unwrap()).start();
+
+    // Log: Stdout Debug Logs
+    // env_logger::builder().format_timestamp(None).init();
+
+    debug!("----------------------------------");
     debug!(
         "Init Time ({}): {}",
         backend_name,
@@ -81,6 +91,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // TODO: Wallpaper Selection Strategies
         // Spaced Out Time Selection Strategy
+        // - to do this, return Vec of wallpapers instead of String
+        // - if Vec.len() > 1, space out
         // Random Selection Strategy
 
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
