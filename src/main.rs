@@ -10,16 +10,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let config = Config::load()?;
 
-    // Log: File + Stdout Debug Logs
-    let logfile = dirs::state_dir()
-        .map(|path| path.join("expression/expression.log"))
-        .unwrap();
-    let mut builder = log2::open(logfile.to_str().unwrap());
+    // Log: file + stdout Debug Logs
     let devel_mode = env::var("RUST_LOG").is_ok();
-    if devel_mode {
-        builder = builder.tee(true);
-        builder = builder.level(env::var("RUST_LOG").unwrap());
-    }
+    let builder = if devel_mode {
+        log2::stdout().level(env::var("RUST_LOG").unwrap())
+    } else {
+        let logfile = dirs::state_dir()
+            .map(|path| path.join("expression/expression.log"))
+            .unwrap();
+        log2::open(logfile.to_str().unwrap())
+    };
     let _log2 = builder.start();
     debug!("----------------------------------");
 
