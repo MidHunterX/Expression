@@ -4,34 +4,37 @@ use expression::backends::get_backend;
 use expression::config::Config;
 use expression::utils::{calc, wallpaper};
 use log2::{debug, error, info, warn};
-use std::{path::PathBuf, time::Instant};
+use std::{env, time::Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let config = Config::load()?;
 
+    // Log: File + Stdout Debug Logs
+    let logfile = dirs::state_dir()
+        .map(|path| path.join("expression/expression.log"))
+        .unwrap();
+    let mut builder = log2::open(logfile.to_str().unwrap());
+    let devel_mode = env::var("RUST_LOG").is_ok();
+    if devel_mode {
+        builder = builder.tee(true);
+        builder = builder.level(env::var("RUST_LOG").unwrap());
+    }
+    let _log2 = builder.start();
+    debug!("----------------------------------");
+
+    // Backend Initialization
     let backend = get_backend(&config.general.backend)?;
     backend.initialize()?;
     let backend_name = backend.name();
     let extensions = backend.supported_extensions();
-
-    // Log: File + Stdout Debug Logs
-    let logfile = dirs::state_dir()
-        .map(|path| path.join("expression/expression.log"))
-        .unwrap_or_else(|| PathBuf::from(""));
-    // let _log2 = log2::open(logfile.to_str().unwrap()).tee(true).start();
-    let _log2 = log2::open(logfile.to_str().unwrap()).start();
-
-    // Log: Stdout Debug Logs
-    // env_logger::builder().format_timestamp(None).init();
-
-    debug!("----------------------------------");
     debug!(
         "Init Time ({}): {}",
         backend_name,
         format!("{:?}", start.elapsed()).blue()
     );
 
+    // Config Variables
     let wallpaper_dir = config.directories.wallpaper.as_str();
     // Don't worry, JFK won't get executed here because defaults come from config
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
