@@ -7,6 +7,33 @@ optimized for minimal system resource usage. Designed with performance and
 customizability in mind, it selects wallpapers based on hour and user-defined
 rules.
 
+## ⛲ Features
+
+- [x] Supports multiple wallpaper setters (swww, feh)
+- [x] 24-hour wallpaper cycling
+- [x] Set specific wallpaper on specific hour
+- [x] Set random wallpaper from a group of wallpapers for a specific hour
+- [x] Override with special wallpaper based on a timetable (e.g., lunch, sleep)
+- [ ] Randomization Scopes:
+  - [x] Current Group
+  - [ ] Current Collection
+  - [ ] All Collections (excluding Special)
+  - [ ] All Wallpapers (excluding Special)
+- [ ] Spread collection of wallpapers throughout the day
+- [ ] Spread group of wallpapers throughout an hour
+
+### Technical Features
+
+- [x] TOML-based configuration system
+- [x] Background service/daemon support
+- [x] Hierarchical wallpaper organization:
+  - Root-level: Collections (e.g., Wallpapers, Vibe, NSFW)
+  - Mid-level: Time-based Wallpaper Items (Entries and Groups)
+  - Leaf-level: Wallpapers (image files)
+- [ ] Efficient, event-driven execution (no polling or sleeps)
+- [ ] Terminal UI configurator
+- [ ] Inter process communication (IPC) support
+
 ## 🚀 Installation
 
 ### Prerequisites
