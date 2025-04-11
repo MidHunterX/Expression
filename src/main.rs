@@ -25,7 +25,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Backend Initialization
     let backend = get_backend(&config.general.backend)?;
-    backend.initialize()?;
     let backend_name = backend.name();
     let extensions = backend.supported_extensions();
     debug!(

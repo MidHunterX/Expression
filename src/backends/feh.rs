@@ -5,8 +5,11 @@ use std::process::Command;
 pub struct FehBackend;
 
 impl FehBackend {
-    pub fn new() -> Self {
-        Self
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        if !Self::is_available() {
+            return Err(("feh is not installed").into());
+        }
+        Ok(Self)
     }
 
     fn is_available() -> bool {
@@ -21,13 +24,6 @@ impl FehBackend {
 impl Backend for FehBackend {
     fn name(&self) -> &str {
         "feh"
-    }
-
-    fn initialize(&self) -> Result<(), Box<dyn Error>> {
-        if !Self::is_available() {
-            return Err(("feh is not installed").into());
-        }
-        Ok(())
     }
 
     fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>> {

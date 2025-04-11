@@ -7,8 +7,20 @@ use std::time::Duration;
 pub struct SwwwBackend;
 
 impl SwwwBackend {
-    pub fn new() -> Self {
-        Self
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        // CASE: swww already up and running
+        if Self::is_available() {
+            return Ok(Self);
+        }
+        // CASE: swww loading on startup
+        for _ in 0..5 {
+            if Self::is_available() {
+                sleep(Duration::from_secs(1));
+                return Ok(Self);
+            }
+            sleep(Duration::from_secs(1));
+        }
+        Err(("swww is not installed or running").into())
     }
 
     fn is_available() -> bool {
@@ -25,22 +37,6 @@ impl Backend for SwwwBackend {
         "swww"
     }
 
-    fn initialize(&self) -> Result<(), Box<dyn Error>> {
-        // CASE: swww already up and running
-        if Self::is_available() {
-            return Ok(());
-        }
-        // CASE: swww loading on startup
-        for _ in 0..5 {
-            if Self::is_available() {
-                sleep(Duration::from_secs(1));
-                return Ok(());
-            }
-            sleep(Duration::from_secs(1));
-        }
-        Err(("swww is not installed or running").into())
-    }
-
     fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>> {
         let status = Command::new("swww")
             // TODO: Make args configurable and remove hardcoded values
@@ -54,17 +50,11 @@ impl Backend for SwwwBackend {
         }
     }
 
-    // Simple non-blocking implementation
-    /* fn apply_wallpaper(&self, wallpaper_path: &str) -> Result<(), Box<dyn Error>> {
-        Command::new("swww")
-            .args(["img", wallpaper_path, "-t", "fade"])
-            .spawn()?;
-        Ok(())
-    } */
-
     // NOTE: Vec<&'static str> would be a great fit for modifying list on runtime (push(), remove()).
     // using &[&str] (Static Slice of String) instead since it avoids heap allocation.
     fn supported_extensions(&self) -> &[&str] {
-        &["jpg", "jpeg", "png", "gif", "webp", "bmp", "pnm", "tga", "tiff"]
+        &[
+            "jpg", "jpeg", "png", "gif", "webp", "bmp", "pnm", "tga", "tiff",
+        ]
     }
 }
