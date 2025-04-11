@@ -2,7 +2,7 @@
 
 # Expression
 
-Expression is a lightweight and highly efficient time based wallpaper auto-selector, optimized for minimal system resource usage. Designed with performance and customizability in mind, it selects wallpapers based on hour and user-defined rules.
+Expression is a lightweight and highly efficient time based wallpaper auto-selector for Wayland, optimized for minimal system resource usage. Designed with performance and customizability in mind, it selects wallpapers based on hour and user-defined rules.
 
 ## ⛲ Features
 
@@ -35,6 +35,10 @@ Expression is a lightweight and highly efficient time based wallpaper auto-selec
 - [ ] Efficient, event-driven execution (no polling or sleeps)
 - [ ] Terminal UI configurator
 - [ ] Inter process communication (IPC) support
+
+## 🤷 Why?
+
+Expression was initially a simple bash script for timed wallpapers. However, it quickly became unmaintainable as I wanted to add more features. That is exactly what this project is: a fully maintainable, optimized timed wallpaper script with advanced features.
 
 ## 🚀 Installation
 
