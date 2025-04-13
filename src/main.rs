@@ -2,25 +2,15 @@ use chrono::{Local, Timelike};
 use colored::Colorize;
 use expression::backends::get_backend;
 use expression::config::Config;
-use expression::utils::{calc, wallpaper};
+use expression::utils::{calc, wallpaper, logger};
 use log2::{debug, error, info, warn};
-use std::{env, time::Instant};
+use std::time::Instant;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let config = Config::load()?;
 
-    // Log: file + stdout Debug Logs
-    let devel_mode = env::var("RUST_LOG").is_ok();
-    let builder = if devel_mode {
-        log2::stdout().level(env::var("RUST_LOG").unwrap())
-    } else {
-        let logfile = dirs::state_dir()
-            .map(|path| path.join("expression/expression.log"))
-            .unwrap();
-        log2::open(logfile.to_str().unwrap())
-    };
-    let _log2 = builder.start();
+    let _log2 = logger::init();
     debug!("----------------------------------");
 
     // Backend Initialization
