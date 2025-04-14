@@ -60,11 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     if let Some(filename) = config_special_entries.get(&hour.to_string()) {
                         if let Some(item) = special_items.get(filename) {
                             info!("Special Collection Activated!");
-                            selected_item = wallpaper::select_wallpaper(
-                                item,
-                                extensions,
-                                &config_group_selection,
-                            );
+                            selected_item = wallpaper::select_wallpaper_item(item, extensions);
                         }
                     }
                 }
@@ -78,8 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if selected_item.is_empty() {
             let items = wallpaper::get_wallpaper_items(wallpaper_dir, extensions, Some(hour))?;
             if let Some(item) = items.get(&hour) {
-                selected_item =
-                    wallpaper::select_wallpaper(item, extensions, &config_group_selection);
+                selected_item = wallpaper::select_wallpaper_item(item, extensions);
             }
         }
 
@@ -87,20 +82,44 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
         let start = Instant::now();
 
+        let mut interval = 60; // Minutes
+        let mut refresh_strategy = "T2";
+
         let item_size = selected_item.len();
         if item_size == 0 {
             warn!("No wallpaper available for {}", hour);
         } else if item_size == 1 {
-            // Fixed Time Strategy or Random Strategy
+            // SELECT: Fixed Time Strategy
             backend.apply_wallpaper(&selected_item[0])?;
             info!("Wallpaper applied successfully!");
         } else if item_size > 1 {
-            // Spread Strategy
-            info!("Multiple wallpapers available for {}", hour);
-            let wallpaper_index = rand::random_range(0..item_size);
-            backend.apply_wallpaper(&selected_item[wallpaper_index])?;
-            info!("Wallpaper applied successfully!");
-            // TODO: Move Random Strategy here
+            if config_group_selection == "spread" {
+                // SELECT: Spread Strategy
+                // Algorithm
+                // - Wallpapers should be less than 60 (eg.5)
+                // - refresh_interval = 60/len (eg. 60/5 = 12)
+                // - wallpaper_index = ceil(minute_now/interval) (eg. 30/12 = 3)
+                const MAX_SPREAD_ITEMS: usize = 60;
+                if item_size > MAX_SPREAD_ITEMS {
+                    warn!("Too many wallpapers to spread effectively ({item_size} > {MAX_SPREAD_ITEMS})");
+                }
+                let refresh_interval = (60/item_size) as u32;
+                // ceil = (a + b - 1) / b
+                let mut wallpaper_index = (now.minute() + refresh_interval - 1) / refresh_interval;
+                wallpaper_index = wallpaper_index.min(item_size as u32); // Avoid overflow
+                println!("wallpaper_index: [{}/{}]", wallpaper_index, item_size);
+                backend.apply_wallpaper(&selected_item[wallpaper_index as usize])?;
+                info!("Wallpaper(spread) applied successfully!");
+                // Overrides
+                interval = refresh_interval as u32;
+                refresh_strategy = "T";
+            } else {
+                // SELECT: Random Strategy
+                info!("Multiple wallpapers available for {}", hour);
+                let wallpaper_index = rand::random_range(0..item_size);
+                backend.apply_wallpaper(&selected_item[wallpaper_index])?;
+                info!("Wallpaper(group) applied successfully!");
+            }
         }
 
         debug!(
@@ -113,11 +132,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // (entries.len() / 24) for spaced out
 
         // Wait: 24 Hour Cycle Strategy
-        let interval = 60; // Minutes
         let wait_seconds = calc::wait_time(interval, now);
         info!("Waiting for {}m {}s", wait_seconds / 60, wait_seconds % 60);
 
-        let refresh_strategy = "T2";
         if refresh_strategy == "T2" {
             calc::refresh_t2(interval, now, wait_seconds);
         } else if refresh_strategy == "T" {
