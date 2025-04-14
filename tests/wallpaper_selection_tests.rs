@@ -41,10 +41,10 @@ fn test_select_wallpaper_with_group_entry() {
     setup_test_dir(&test_dir, &["wallpaper1.jpg", "wallpaper2.png"], &[]).unwrap();
 
     let items = vec![wallpaper::WallpaperItem::Group(test_dir.clone())];
-    let selected = wallpaper::select_wallpaper(&items, &["jpg", "png"]);
+    let selected = wallpaper::select_wallpaper_item(&items, &["jpg", "png"]);
 
     assert!(
-        selected.ends_with("wallpaper1.jpg") || selected.ends_with("wallpaper2.png"),
+        selected.len() == 2,
         "Expected selected wallpaper from group"
     );
 
@@ -60,9 +60,9 @@ fn test_select_wallpaper_with_direct_entry() {
     fs::write(&wallpaper_path, "test").unwrap();
 
     let items = vec![wallpaper::WallpaperItem::Entry(wallpaper_path.clone())];
-    let selected = wallpaper::select_wallpaper(&items, &["jpg", "png"]);
+    let selected = wallpaper::select_wallpaper_item(&items, &["jpg", "png"]);
 
-    assert_eq!(selected, wallpaper_path.display().to_string());
+    assert_eq!(selected[0], wallpaper_path.display().to_string());
 
     cleanup_test_dir(&test_dir);
 }
