@@ -15,6 +15,7 @@ pub struct Config {
 pub struct GeneralConfig {
     pub backend: String,
     pub enable_special: bool,
+    pub group_selection_strategy: String
 }
 
 #[derive(Debug, Deserialize)]

@@ -1,6 +1,7 @@
 [general]
 backend = "swww"
 enable_special = true
+group_selection_strategy = "random" # random, spread
 
 [directories]
 wallpaper = "/path/to/wallpapers"
