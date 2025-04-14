@@ -7,7 +7,7 @@ wallpaper = "/path/to/wallpapers"
 # special = "/custom/path/to/special/"
 # collections = "/custom/path/to/collections/"
 
-# [special_entries]
+[special_entries]
 # 5 = "wakeup"
 # 7 = "breakfast"
 # 9 = "workout"
