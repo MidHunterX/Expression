@@ -3,6 +3,7 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 
+#[derive(Clone)]
 pub enum WallpaperItem {
     Entry(PathBuf),
     Group(PathBuf),
@@ -207,7 +208,6 @@ use log2::info;
 /// Selects a random wallpaper from a wallpaper Group.
 /// Returns a tuple of (path, index, total)
 pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(String, usize, usize)> {
-    // Selection: Random Strategy
     let sub_collection_dir = path.display().to_string();
     let sub_entries = get_wallpapers(&sub_collection_dir, extensions).ok()?;
     if sub_entries.is_empty() {
@@ -220,33 +220,59 @@ pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(Strin
     Some((selected_wallpaper, wallpaper_index, sub_entries.len()))
 }
 
+/// Selects all wallpapers from a wallpaper Group.
+pub fn select_all_entry(path: &PathBuf, extensions: &[&str]) -> Option<Vec<String>> {
+    let group_dir = path.display().to_string();
+    let wallpapers = get_wallpapers(&group_dir, extensions).ok()?;
+    if wallpapers.is_empty() {
+        return None; // Avoid panic if empty
+    }
+    let mut wallpaper_vec: Vec<String> = Vec::new();
+    for wallpaper in wallpapers {
+        wallpaper_vec.push(wallpaper.display().to_string());
+    }
+    Some(wallpaper_vec)
+}
+
 /// Selects a wallpaper from Wallpaper Object (entry/group)
-pub fn select_wallpaper(entry_vector: &Vec<WallpaperItem>, extensions: &[&str]) -> String {
+pub fn select_wallpaper(
+    entry_vector: &Vec<WallpaperItem>,
+    extensions: &[&str],
+    select_strategy: &str,
+) -> Vec<String> {
     for entry in entry_vector {
         match entry {
             WallpaperItem::Group(path) => {
-                // Random Strategy
-                if let Some((entry, index, total)) = select_random_entry(path, extensions) {
-                    info!(
-                        "Selected Wallpaper: [{}/{}] {}",
-                        index,
-                        total,
-                        entry.split('/').last().unwrap()
-                    );
-                    return entry;
+                if select_strategy == "spread" {
+                    // SELECT: Spread Strategy
+                    if let Some(wallpapers) = select_all_entry(path, extensions) {
+                        info!(
+                            "Selected Group: {}",
+                            path.display().to_string().split('/').last().unwrap()
+                        );
+                        return wallpapers;
+                    }
+                } else {
+                    // SELECT: Random Strategy
+                    if let Some((entry, index, total)) = select_random_entry(path, extensions) {
+                        info!(
+                            "Selected Wallpaper: [{}/{}] {}",
+                            index,
+                            total,
+                            entry.split('/').last().unwrap()
+                        );
+                        return vec![entry];
+                    }
                 }
             }
 
             WallpaperItem::Entry(path) => {
-                // Fixed Time Strategy
-                let selected_wallpaper = path.display().to_string();
-                info!(
-                    "Selected Wallpaper: {}",
-                    selected_wallpaper.split('/').last().unwrap()
-                );
-                return selected_wallpaper;
+                // SELECT: Fixed Time Strategy
+                let entry = path.display().to_string();
+                info!("Selected Wallpaper: {}", entry.split('/').last().unwrap());
+                return vec![entry];
             }
         }
     }
-    String::new()
+    Vec::new()
 }

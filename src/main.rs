@@ -2,7 +2,7 @@ use chrono::{Local, Timelike};
 use colored::Colorize;
 use expression::backends::get_backend;
 use expression::config::Config;
-use expression::utils::{calc, wallpaper, logger};
+use expression::utils::{calc, logger, wallpaper};
 use log2::{debug, error, info, warn};
 use std::time::Instant;
 
@@ -29,8 +29,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let config_special_entries = config.special_entries;
     let config_special_enabled = config.general.enable_special;
+    let config_group_selection = config.general.group_selection_strategy;
 
-    let mut selected_wallpaper = String::new();
+    let mut selected_item = Vec::new();
 
     loop {
         let start = Instant::now();
@@ -41,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             format!("{}", now.format("%H:%M")).cyan()
         );
 
-        selected_wallpaper.clear();
+        selected_item.clear();
 
         // TODO: Collection: Theme Override Strategy
         /* let collections = wallpaper::get_collections(wallpaper_dir)?;
@@ -52,14 +53,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // TODO: Randomized Scope Strategy
 
         // COLLECTION: Special Collection
-        if selected_wallpaper.is_empty() && config_special_enabled {
+        if selected_item.is_empty() && config_special_enabled {
             let special_items_result = wallpaper::get_special_items(special_dir, extensions);
             match special_items_result {
                 Ok(special_items) => {
                     if let Some(filename) = config_special_entries.get(&hour.to_string()) {
                         if let Some(item) = special_items.get(filename) {
                             info!("Special Collection Activated!");
-                            selected_wallpaper = wallpaper::select_wallpaper(item, extensions);
+                            selected_item = wallpaper::select_wallpaper(
+                                item,
+                                extensions,
+                                &config_group_selection,
+                            );
                         }
                     }
                 }
@@ -70,31 +75,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // COLLECTION: Normal Collection
-        if selected_wallpaper.is_empty() {
+        if selected_item.is_empty() {
             let items = wallpaper::get_wallpaper_items(wallpaper_dir, extensions, Some(hour))?;
             if let Some(item) = items.get(&hour) {
-                selected_wallpaper = wallpaper::select_wallpaper(item, extensions);
+                selected_item =
+                    wallpaper::select_wallpaper(item, extensions, &config_group_selection);
             }
         }
 
-        if selected_wallpaper.is_empty() {
-            warn!("No wallpaper selected");
-        }
-
-        // TODO: Wallpaper Selection Strategies
-        // Spaced Out Time Selection Strategy
-        // - to do this, return Vec of wallpapers instead of String
-        // - if Vec.len() > 1, space out
-        // Random Selection Strategy
-
+        // Wallpaper Selection Strategies
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
         let start = Instant::now();
 
-        if selected_wallpaper.is_empty() {
+        let item_size = selected_item.len();
+        if item_size == 0 {
             warn!("No wallpaper available for {}", hour);
-        } else {
-            backend.apply_wallpaper(&selected_wallpaper)?;
+        } else if item_size == 1 {
+            // Fixed Time Strategy or Random Strategy
+            backend.apply_wallpaper(&selected_item[0])?;
             info!("Wallpaper applied successfully!");
+        } else if item_size > 1 {
+            // Spread Strategy
+            info!("Multiple wallpapers available for {}", hour);
+            let wallpaper_index = rand::random_range(0..item_size);
+            backend.apply_wallpaper(&selected_item[wallpaper_index])?;
+            info!("Wallpaper applied successfully!");
+            // TODO: Move Random Strategy here
         }
 
         debug!(
