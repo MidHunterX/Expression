@@ -245,7 +245,7 @@ pub fn select_wallpaper_item(
                         .and_then(|s| s.to_str())
                         .unwrap_or("Unknown");
 
-                    info!("Selected Group: {}", group_name.blue());
+                    info!("Selected Group: {}", group_name.bright_green());
                     return wallpaper_vec;
                 };
             }
@@ -259,7 +259,7 @@ pub fn select_wallpaper_item(
                     .and_then(|s| s.to_str())
                     .unwrap_or("Unknown");
 
-                info!("Selected Wallpaper: {}", file_name.blue());
+                info!("Selected Wallpaper: {}", file_name.bright_green());
                 return vec![entry_str];
             }
         }

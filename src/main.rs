@@ -37,9 +37,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let start = Instant::now();
         let now = Local::now();
         let hour = now.hour() as u8;
-        debug!(
+        info!(
             "Current Time: {}",
-            format!("{}", now.format("%H:%M:%S")).bright_green()
+            format!("{}", now.format("%H:%M:%S")).bright_purple()
         );
 
         selected_item.clear();
@@ -160,7 +160,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 (wait_seconds % 3600) / 60,
                 wait_seconds % 60,
             )
-            .bright_green()
+            .bright_purple()
         );
 
         // CHECK: wait time discrepancies
