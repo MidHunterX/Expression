@@ -1,10 +1,19 @@
 use chrono::{Local, Timelike};
 use colored::Colorize;
+use ctrlc;
 use expression::backends::get_backend;
 use expression::config::{Config, GroupSelectionStrategy};
 use expression::utils::{calc, logger, wallpaper};
 use log2::{debug, error, info, warn};
+use std::process;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Instant;
+
+pub enum RefreshStrategy {
+    Sleep,     // Sleeps once for the entire interval
+    Log2Sleep, // Sleeps multiple times in log2 steps
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
@@ -33,7 +42,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut selected_item = Vec::new();
 
-    loop {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+        println!(": Ctrl+C detected. Bye 👋");
+        process::exit(0);
+    })
+    .expect("Error setting Ctrl-C handler");
+
+    while running.load(Ordering::SeqCst) {
         let start = Instant::now();
         let now = Local::now();
         let hour = now.hour() as u8;
@@ -42,7 +60,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             format!("{}", now.format("%H:%M:%S")).bright_purple()
         );
 
-        selected_item.clear();
+        // █▀▀ █▀█ █░░ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
+        // █▄▄ █▄█ █▄▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
+        // Wallpaper Collection and Selection
 
         // TODO: Collection: Theme Override Strategy
         /* let collections = wallpaper::get_collections(wallpaper_dir)?;
@@ -65,7 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                 }
                 Err(err) => {
-                    warn!("Special Collection Error: {}", err);
+                    error!("Special Collection Error: {}", err);
                 }
             }
         }
@@ -78,12 +98,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
+        // █▀ █▀▀ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
+        // ▄█ ██▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
+        // Wallpaper Selection and Aplication
+
         // Wallpaper Selection Strategies
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
         let start = Instant::now();
 
         let mut interval = 60.0; // Minutes
-        let mut refresh_strategy = "T2";
+        let mut refresh_strategy = RefreshStrategy::Log2Sleep;
 
         let item_size = selected_item.len();
         if item_size == 0 {
@@ -123,7 +147,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     );
                     // Overrides
                     interval = slice_duration;
-                    refresh_strategy = "T";
+                    refresh_strategy = RefreshStrategy::Sleep;
                 }
                 GroupSelectionStrategy::Random => {
                     info!("Multiple wallpapers available for {}", hour);
@@ -148,6 +172,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             format!("{:?}", start.elapsed()).blue()
         );
 
+        // █░█░█ ▄▀█ █ ▀█▀ █ █▄░█ █▀▀
+        // ▀▄▀▄▀ █▀█ █ ░█░ █ █░▀█ █▄█
+        // Wait Time and Checks
+
         // Wait: 24 Hour Cycle Strategy
         let wait_seconds = calc::wait_time(interval, now);
         info!(
@@ -160,6 +188,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .bright_purple()
         );
+
+        selected_item.clear();
 
         // CHECK: wait time discrepancies
         let full_wait_secs = (now.minute() * 60 + now.second()) + wait_seconds as u32;
@@ -175,13 +205,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // REFRESH
-        if refresh_strategy == "T2" {
-            calc::refresh_t2(interval, now, wait_seconds);
-        } else if refresh_strategy == "T" {
-            calc::sleep(wait_seconds);
-        } else {
-            error!("Invalid Refresh Strategy: {}", refresh_strategy);
-            break; // Breaks out of main loop and exits to avoid infinite loop
+        match refresh_strategy {
+            RefreshStrategy::Sleep => {
+                calc::sleep(wait_seconds);
+            }
+            RefreshStrategy::Log2Sleep => {
+                calc::refresh_t2(interval, now, wait_seconds);
+            }
         }
     }
     Ok(())
