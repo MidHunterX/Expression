@@ -1,8 +1,9 @@
 use colored::Colorize;
-use std::collections::BTreeMap;
-use std::fs;
-use std::io;
-use std::path::PathBuf;
+use std::{
+    collections::BTreeMap,
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 #[derive(Clone)]
 pub enum WallpaperItem {
@@ -238,21 +239,28 @@ pub fn select_wallpaper_item(
                     for wallpaper in wallpapers {
                         wallpaper_vec.push(wallpaper.display().to_string());
                     }
-                    info!(
-                        "Selected Group: {}",
-                        path.display().to_string().split('/').last().unwrap()
-                    );
+
+                    let group_name = Path::new(&group_dir)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("Unknown");
+
+                    info!("Selected Group: {}", group_name.blue());
                     return wallpaper_vec;
                 };
             }
 
             WallpaperItem::Entry(path) => {
-                let entry = path.display().to_string();
-                info!(
-                    "Selected Wallpaper: {}",
-                    entry.split('/').last().unwrap().blue()
-                );
-                return vec![entry];
+                let entry_path = Path::new(&path);
+                let entry_str = entry_path.display().to_string();
+
+                let file_name = entry_path
+                    .file_name()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("Unknown");
+
+                info!("Selected Wallpaper: {}", file_name.blue());
+                return vec![entry_str];
             }
         }
     }
