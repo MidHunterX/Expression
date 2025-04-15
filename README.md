@@ -12,6 +12,7 @@ Expression is a lightweight and highly efficient time based wallpaper auto-selec
 - [x] 24-hour wallpaper cycling
 - [x] Set specific wallpaper on specific hour
 - [x] Set random wallpaper from a group of wallpapers for a specific hour
+- [x] Distribute group of wallpapers throughout the course of an hour
 - [x] Override with special wallpaper based on a timetable (e.g., lunch, sleep)
 
 ### Technical Features
@@ -26,15 +27,15 @@ Expression is a lightweight and highly efficient time based wallpaper auto-selec
 ### Future Features
 
 - [ ] Randomization Scopes:
-  - [x] Current Group
-  - [ ] Current Collection
-  - [ ] All Collections (excluding Special)
-  - [ ] All Wallpapers (excluding Special)
+  - [x] Within Current Group
+  - [ ] Within Current Collection
+  - [ ] Across all Collections (excluding Special)
+  - [ ] Across all Wallpapers (excluding Special)
 - [ ] Spread collection of wallpapers throughout the day
-- [ ] Spread group of wallpapers throughout an hour
+- [x] Spread group of wallpapers throughout an hour
 - [ ] Efficient, event-driven execution (no polling or sleeps)
-- [ ] Terminal UI configurator
-- [ ] Inter process communication (IPC) support
+- [ ] Interactive Terminal User Interface (TUI) Configurator
+- [ ] Inter Process Communication (IPC) support for external control or dynamic updates
 
 ## 🤷 Why?
 
@@ -108,6 +109,15 @@ special = "~/Pictures/Wallpapers/Special"
 5 = "rise and shine"
 9 = "workout_motivation"
 23 = "sleep_time"
+
+[backend.custom]
+cmd_check_availability = "backend --version"
+cmd_wallpaper_change = "backend set <img_arguments>"
+supported_extensions = ["jpg", "jpeg", "png", "gif"]
+
+[backend.swww]
+post_command = ~/.config/waypaper/post_wallpaper_change.sh $wallpaper
+img_arguments = "--transition-type fade"
 ```
 
 ## 📚 Concepts
@@ -198,6 +208,13 @@ special = "~/Pictures/Wallpapers/Special/"
 ## 📜 License
 
 Expression is licensed under the **GNU Affero GPL v3**, ensuring all modifications and server-hosted versions remain open-source.
+
+## 🤝 Acknowledgements
+
+Thanks to:
+
+- [swww](https://github.com/LGFae/swww) for the awesome wallpaper setter with animated transitions for Wayland
+- [feh](https://github.com/feh/feh), the best image viewer which can also be used as a wallpaper setter for X11
 
 ## 🙌 Contributing
 
