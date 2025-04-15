@@ -1,7 +1,7 @@
 use chrono::{Local, Timelike};
 use colored::Colorize;
 use expression::backends::get_backend;
-use expression::config::Config;
+use expression::config::{Config, GroupSelectionStrategy};
 use expression::utils::{calc, logger, wallpaper};
 use log2::{debug, error, info, warn};
 use std::time::Instant;
@@ -91,37 +91,56 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else if item_size == 1 {
             // SELECT: Fixed Time Strategy
             backend.apply_wallpaper(&selected_item[0])?;
-            info!("Wallpaper applied successfully!");
+            info!(
+                "Wallpaper (entry) applied: {}",
+                std::path::Path::new(&selected_item[0])
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or("Unknown")
+                    .bright_green()
+            );
         } else if item_size > 1 {
-            if config_group_selection == "spread" {
-                // SELECT: Spread Strategy
-                // Algorithm
-                // - Wallpapers should be less than 60 (eg.5)
-                // - refresh_interval = 60/len (eg. 60/5 = 12)
-                // - wallpaper_index = ceil(minute_now/interval) (eg. 30/12 = 3)
+            match config_group_selection {
+                GroupSelectionStrategy::Spread => {
+                    let total_items = selected_item.len();
+                    let max_spread_items = interval as usize;
+                    if total_items > max_spread_items {
+                        warn!("Too many wallpapers to spread effectively ({total_items} > {max_spread_items})");
+                    }
+                    let minute = now.minute() as f64;
+                    let slice_duration = interval / total_items as f64;
+                    let wallpaper_index =
+                        ((minute / slice_duration).floor()).min((total_items - 1) as f64) as usize;
 
-                let total_items = selected_item.len();
-                let max_spread_items = interval as usize;
-                if total_items > max_spread_items {
-                    warn!("Too many wallpapers to spread effectively ({total_items} > {max_spread_items})");
+                    backend.apply_wallpaper(&selected_item[wallpaper_index as usize])?;
+                    info!(
+                        "Wallpaper (group) applied [{}/{}]: {}",
+                        (wallpaper_index + 1).to_string().cyan(),
+                        (total_items).to_string().cyan(),
+                        std::path::Path::new(&selected_item[wallpaper_index])
+                            .file_name()
+                            .and_then(|name| name.to_str())
+                            .unwrap_or("Unknown")
+                            .bright_green()
+                    );
+                    // Overrides
+                    interval = slice_duration;
+                    refresh_strategy = "T";
                 }
-                let minute = now.minute() as f64;
-                let slice_duration = interval / total_items as f64;
-                let wallpaper_index =
-                    ((minute / slice_duration).floor()).min((total_items - 1) as f64) as usize;
-
-                println!("wallpaper_index: [{}/{}]", wallpaper_index + 1, total_items);
-                backend.apply_wallpaper(&selected_item[wallpaper_index as usize])?;
-                info!("Wallpaper(spread) applied successfully!");
-                // Overrides
-                interval = slice_duration;
-                refresh_strategy = "T";
-            } else {
-                // SELECT: Random Strategy
-                info!("Multiple wallpapers available for {}", hour);
-                let wallpaper_index = rand::random_range(0..item_size);
-                backend.apply_wallpaper(&selected_item[wallpaper_index])?;
-                info!("Wallpaper(group) applied successfully!");
+                GroupSelectionStrategy::Random => {
+                    info!("Multiple wallpapers available for {}", hour);
+                    let wallpaper_index = rand::random_range(0..item_size);
+                    backend.apply_wallpaper(&selected_item[wallpaper_index])?;
+                    info!(
+                        "Wallpaper (group) applied [{}]: {}",
+                        (wallpaper_index + 1).to_string().cyan(),
+                        std::path::Path::new(&selected_item[wallpaper_index])
+                            .file_name()
+                            .and_then(|name| name.to_str())
+                            .unwrap_or("Unknown")
+                            .bright_green()
+                    );
+                }
             }
         }
 
@@ -145,13 +164,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         // CHECK: wait time discrepancies
-        let current_timeframe = (wait_seconds + ((now.minute() * 60) + now.second()) as u64) / 60;
-        if current_timeframe != interval as u64 {
-            warn!(
-                "Wait time discrepancy detected! ({} != {})",
-                current_timeframe, interval
-            );
-        };
+        let now_secs = now.minute() * 60 + now.second();
+        let expected_secs = interval as u32 * 60;
+        let diff = (now_secs + wait_seconds as u32) % expected_secs;
+        if diff != 0 {
+            warn!("Wait time misaligned by {} seconds", diff.to_string().red());
+        }
 
         // REFRESH
         if refresh_strategy == "T2" {

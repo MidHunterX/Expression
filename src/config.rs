@@ -4,18 +4,25 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use toml;
 
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GroupSelectionStrategy {
+    Spread,
+    Random,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub general: GeneralConfig,
     pub directories: DirectoryConfig,
-    pub special_entries: BTreeMap<String, String>
+    pub special_entries: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct GeneralConfig {
     pub backend: String,
     pub enable_special: bool,
-    pub group_selection_strategy: String
+    pub group_selection_strategy: GroupSelectionStrategy,
 }
 
 #[derive(Debug, Deserialize)]
@@ -81,7 +88,9 @@ fn merge_toml(mut base: toml::Value, overrides: toml::Value) -> toml::Value {
             match base_table.get(&key) {
                 // If key exists in both, recursively merge if both are tables
                 Some(base_value) => {
-                    if let (toml::Value::Table(_), toml::Value::Table(_)) = (base_value, &override_value) {
+                    if let (toml::Value::Table(_), toml::Value::Table(_)) =
+                        (base_value, &override_value)
+                    {
                         // Create new merged value
                         let merged = merge_toml(base_value.clone(), override_value);
                         base_table.insert(key, merged);
@@ -89,11 +98,11 @@ fn merge_toml(mut base: toml::Value, overrides: toml::Value) -> toml::Value {
                         // Else replace value
                         base_table.insert(key, override_value);
                     }
-                },
+                }
                 // If key not exist in base, insert override value
                 None => {
                     base_table.insert(key, override_value);
-                },
+                }
             }
         }
     }
