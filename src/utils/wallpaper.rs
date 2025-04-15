@@ -246,6 +246,7 @@ pub fn select_wallpaper_item(
                         .unwrap_or("Unknown");
 
                     info!("Selected Group: {}", group_name.bright_green());
+                    wallpaper_vec.sort();
                     return wallpaper_vec;
                 };
             }
