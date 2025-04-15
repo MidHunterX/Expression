@@ -209,13 +209,6 @@ special = "~/Pictures/Wallpapers/Special/"
 
 Expression is licensed under the **GNU Affero GPL v3**, ensuring all modifications and server-hosted versions remain open-source.
 
-## 🤝 Acknowledgements
-
-Thanks to:
-
-- [swww](https://github.com/LGFae/swww) for the awesome wallpaper setter with animated transitions for Wayland
-- [feh](https://github.com/feh/feh), the best image viewer which can also be used as a wallpaper setter for X11
-
 ## 🙌 Contributing
 
 Contributions are welcome! Feel free to submit issues or pull requests.
