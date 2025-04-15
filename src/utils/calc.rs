@@ -8,16 +8,16 @@ use chrono::{DateTime, Local, Timelike};
 /// use chrono::{Local, TimeZone};
 /// use expression::utils::calc::wait_time;
 ///
-/// let interval = 60; // 1 hour
+/// let interval = 60.0; // 1 hour
 /// let now = Local.with_ymd_and_hms(2025, 3, 31, 14, 45, 0).unwrap();
 ///
 /// let wait_seconds = wait_time(interval, now);
 ///
 /// assert_eq!(wait_seconds, 900); // 15 minutes
 /// ```
-pub fn wait_time(interval: u32, now: DateTime<Local>) -> u64 {
+pub fn wait_time(interval: f64, now: DateTime<Local>) -> u64 {
     let current = now.minute() * 60 + now.second();
-    let next = interval * 60;
+    let next = (interval * 60.0) as u32;
     let remaining = current % next;
     let wait = next - remaining;
     wait as u64
@@ -32,7 +32,7 @@ pub fn wait_time(interval: u32, now: DateTime<Local>) -> u64 {
 /// use chrono::{DateTime, Local, TimeZone};
 /// use expression::utils::calc::refresh_time;
 ///
-/// let interval = 60; // 1 hour
+/// let interval = 60.0; // 1 hour
 /// let old_now = Local.with_ymd_and_hms(2025, 3, 31, 14, 40, 0).unwrap();
 /// let new_now = Local.with_ymd_and_hms(2025, 3, 31, 14, 45, 0).unwrap();
 ///
@@ -42,7 +42,7 @@ pub fn wait_time(interval: u32, now: DateTime<Local>) -> u64 {
 /// assert_eq!(wait_seconds, 900); // 15 minutes
 /// ```
 pub fn refresh_time(
-    interval: u32,
+    interval: f64,
     old_now: DateTime<Local>,
     new_now: DateTime<Local>,
 ) -> (bool, u64) {
@@ -86,7 +86,7 @@ pub fn sleep(wait_seconds: u64) {
 /// 8m  : 9     |    8h  : 15
 /// 16m : 10    |    16h : 16
 /// 32m : 11    |    32h : 17
-pub fn refresh_t2(interval: u32, start_time: DateTime<Local>, wait_seconds: u64) {
+pub fn refresh_t2(interval: f64, start_time: DateTime<Local>, wait_seconds: u64) {
     let mut previous_wait = wait_seconds;
     let mut current_wait = wait_seconds;
 

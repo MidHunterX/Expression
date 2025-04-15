@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
         let start = Instant::now();
 
-        let mut interval = 60; // Minutes
+        let mut interval = 60.0; // Minutes
         let mut refresh_strategy = "T2";
 
         let item_size = selected_item.len();
@@ -99,19 +99,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // - Wallpapers should be less than 60 (eg.5)
                 // - refresh_interval = 60/len (eg. 60/5 = 12)
                 // - wallpaper_index = ceil(minute_now/interval) (eg. 30/12 = 3)
-                const MAX_SPREAD_ITEMS: usize = 60;
-                if item_size > MAX_SPREAD_ITEMS {
-                    warn!("Too many wallpapers to spread effectively ({item_size} > {MAX_SPREAD_ITEMS})");
+
+                let total_items = selected_item.len();
+                let max_spread_items = interval as usize;
+                if total_items > max_spread_items {
+                    warn!("Too many wallpapers to spread effectively ({total_items} > {max_spread_items})");
                 }
-                let refresh_interval = (60 / item_size) as u32;
-                // ceil = (a + b - 1) / b
-                let mut wallpaper_index = (now.minute() + refresh_interval - 1) / refresh_interval;
-                wallpaper_index = wallpaper_index.min(item_size as u32); // Avoid overflow
-                println!("wallpaper_index: [{}/{}]", wallpaper_index, item_size);
+                let minute = now.minute() as f64;
+                let slice_duration = interval / total_items as f64;
+                let wallpaper_index =
+                    ((minute / slice_duration).floor()).min((total_items - 1) as f64) as usize;
+
+                println!("wallpaper_index: [{}/{}]", wallpaper_index + 1, total_items);
                 backend.apply_wallpaper(&selected_item[wallpaper_index as usize])?;
                 info!("Wallpaper(spread) applied successfully!");
                 // Overrides
-                interval = refresh_interval as u32;
+                interval = slice_duration;
                 refresh_strategy = "T";
             } else {
                 // SELECT: Random Strategy
