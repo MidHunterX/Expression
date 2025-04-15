@@ -1,5 +1,26 @@
 use chrono::{DateTime, Local, Timelike};
 
+/// Calculates the current wallpaper group index based on the current time.
+///
+/// This function divides a 1-hour window (3600 seconds) evenly across the total number
+/// of wallpaper groups, and determines which group corresponds to the current time.
+///
+/// # Example
+///
+/// ```
+/// use expression::utils::calc::get_group_index;
+///
+/// let now = chrono::Local::now();
+/// let index = get_group_index(now, 19);
+/// println!("Current group: {}", index);
+/// ```
+pub fn get_group_index(now: DateTime<Local>, total_groups: usize) -> usize {
+    let seconds = now.minute() * 60 + now.second();
+    let total_slots = 60 * 60; // number of seconds in an hour
+    let interval = total_slots as f64 / total_groups as f64;
+    ((seconds as f64 / interval).floor() as usize).min(total_groups - 1)
+}
+
 /// Returns time to wait until next wallpaper refresh time
 ///
 /// # Examples

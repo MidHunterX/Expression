@@ -107,10 +107,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     if total_items > max_spread_items {
                         warn!("Too many wallpapers to spread effectively ({total_items} > {max_spread_items})");
                     }
-                    let minute = now.minute() as f64;
                     let slice_duration = interval / total_items as f64;
-                    let wallpaper_index =
-                        ((minute / slice_duration).floor()).min((total_items - 1) as f64) as usize;
+                    let wallpaper_index = calc::get_group_index(now, total_items);
 
                     backend.apply_wallpaper(&selected_item[wallpaper_index as usize])?;
                     info!(
