@@ -17,7 +17,7 @@ use chrono::{DateTime, Local, Timelike};
 /// ```
 pub fn wait_time(interval: f64, now: DateTime<Local>) -> u64 {
     let current = now.minute() * 60 + now.second();
-    let next = (interval * 60.0) as u32;
+    let next = (interval * 60.0).ceil() as u32;
     let remaining = current % next;
     let wait = next - remaining;
     wait as u64

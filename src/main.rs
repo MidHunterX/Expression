@@ -164,11 +164,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         // CHECK: wait time discrepancies
-        let now_secs = now.minute() * 60 + now.second();
-        let expected_secs = interval as u32 * 60;
-        let diff = (now_secs + wait_seconds as u32) % expected_secs;
+        let full_wait_secs = (now.minute() * 60 + now.second()) + wait_seconds as u32;
+        let expected_secs = (interval * 60.0).ceil() as u32;
+        let diff = full_wait_secs % expected_secs;
         if diff != 0 {
-            warn!("Wait time misaligned by {} seconds", diff.to_string().red());
+            warn!(
+                "Wait time misaligned by {} seconds ({} != {})",
+                diff.to_string().red(),
+                full_wait_secs.to_string().red(),
+                expected_secs.to_string().blue()
+            );
         }
 
         // REFRESH
