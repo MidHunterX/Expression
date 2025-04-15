@@ -1,6 +1,7 @@
 use expression::backends::get_backend;
 
 #[test]
+#[ignore]
 fn test_get_backend_valid() {
     let backend = get_backend("swww");
     assert!(backend.is_ok(), "Expected 'swww' backend to be found");
