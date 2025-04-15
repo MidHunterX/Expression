@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let hour = now.hour() as u8;
         debug!(
             "Current Time: {}",
-            format!("{}", now.format("%H:%M")).cyan()
+            format!("{}", now.format("%H:%M:%S")).bright_green()
         );
 
         selected_item.clear();
@@ -103,7 +103,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if item_size > MAX_SPREAD_ITEMS {
                     warn!("Too many wallpapers to spread effectively ({item_size} > {MAX_SPREAD_ITEMS})");
                 }
-                let refresh_interval = (60/item_size) as u32;
+                let refresh_interval = (60 / item_size) as u32;
                 // ceil = (a + b - 1) / b
                 let mut wallpaper_index = (now.minute() + refresh_interval - 1) / refresh_interval;
                 wallpaper_index = wallpaper_index.min(item_size as u32); // Avoid overflow
@@ -128,13 +128,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             format!("{:?}", start.elapsed()).blue()
         );
 
-        // TODO: Wait Strategy:
-        // (entries.len() / 24) for spaced out
-
         // Wait: 24 Hour Cycle Strategy
         let wait_seconds = calc::wait_time(interval, now);
-        info!("Waiting for {}m {}s", wait_seconds / 60, wait_seconds % 60);
+        info!(
+            "Waiting for: {}",
+            format!(
+                "{:02}:{:02}:{:02}",
+                wait_seconds / 3600,
+                (wait_seconds % 3600) / 60,
+                wait_seconds % 60,
+            )
+            .bright_green()
+        );
 
+        // CHECK: wait time discrepancies
+        let current_timeframe = (wait_seconds + ((now.minute() * 60) + now.second()) as u64) / 60;
+        if current_timeframe != interval as u64 {
+            warn!(
+                "Wait time discrepancy detected! ({} != {})",
+                current_timeframe, interval
+            );
+        };
+
+        // REFRESH
         if refresh_strategy == "T2" {
             calc::refresh_t2(interval, now, wait_seconds);
         } else if refresh_strategy == "T" {

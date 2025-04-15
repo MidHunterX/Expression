@@ -16,14 +16,11 @@ use chrono::{DateTime, Local, Timelike};
 /// assert_eq!(wait_seconds, 900); // 15 minutes
 /// ```
 pub fn wait_time(interval: u32, now: DateTime<Local>) -> u64 {
-    // let secs = now.second();
-    // let mins = now.minute();
-    // let remaining_seconds = 60 - secs;
-    // let remaining_minutes = mins % interval;
-    // let wait_minutes = interval - remaining_minutes - 1;
-    // ((wait_minutes * 60) + remaining_seconds) as u64
-
-    (((interval - (now.minute() % interval) - 1) * 60) + (60 - now.second())) as u64
+    let current = now.minute() * 60 + now.second();
+    let next = interval * 60;
+    let remaining = current % next;
+    let wait = next - remaining;
+    wait as u64
 }
 
 /// Re-calculates refresh time.
