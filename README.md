@@ -50,7 +50,7 @@ Expression is a time-based wallpaper engine that:
 
 ## 🤷 Why?
 
-Expression was initially a simple bash script for timed wallpapers. However, it quickly became unmaintainable as I wanted to add more features. That is exactly what this project is: a fully maintainable, optimized timed wallpaper script with advanced features.
+This project began as a simple Bash script for timed wallpapers, but quickly became unmaintainable as feature requests grew. This Rust rewrite solves that with maintainability, performance, and scalability in mind.
 
 ## 🚀 Installation
 
@@ -117,6 +117,8 @@ wallpaper = "~/Pictures/wallpaper_dir"
 backend = "swww"
 # Enable/Disable special collection feature
 enable_special = true
+# Way to select wallpaper from a group: random, spread
+group_selection_strategy = "random"
 
 [directories]
 # Default wallpaper directory
@@ -156,8 +158,8 @@ wallpaper_dir/
 └── ...
 ```
 
-> Groups (dir/) have higher priority than Entries (file) by default.
-> Currently when a Group is reached, a random wallpaper will be selected
+> Groups (directories) take precedence over Entries (individual files) by default.
+> When a Group is active, a random wallpaper from within the group is selected by default.
 
 ### Collections
 
@@ -273,7 +275,7 @@ wallpaper_dir/
 ...
 ```
 
-Reminder: both directories and files are valid wallpaper items.
+Pro Tip: Both directories and files are valid wallpaper items; mix and match as needed.
 
 3. Now let's configure which time to run these special wallpaper overrides.
 
