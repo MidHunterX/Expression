@@ -2,7 +2,16 @@
 
 # Expression
 
-Expression is a lightweight and highly efficient time based wallpaper auto-selector for Wayland, optimized for minimal system resource usage. Designed with performance and customizability in mind, it selects wallpapers based on hour and user-defined rules.
+_Time-based, rule-driven wallpaper automation for Wayland (and more!)_
+
+## 🧾 TL;DR
+
+Expression is a time-based wallpaper engine that:
+
+- Switches wallpapers hourly (or randomly)
+- Works with `swww` (Wayland) or `feh` (X11)
+- Uses simple TOML config
+- Supports "special" wallpaper overrides (like sleep/lunch reminders)
 
 ## ⛲ Features
 
@@ -12,7 +21,7 @@ Expression is a lightweight and highly efficient time based wallpaper auto-selec
 - [x] 24-hour wallpaper cycling
 - [x] Set specific wallpaper on specific hour
 - [x] Set random wallpaper from a group of wallpapers for a specific hour
-- [x] Distribute group of wallpapers throughout the course of an hour
+- [x] Distribute wallpapers from a group evenly across the hour
 - [x] Override with special wallpaper based on a timetable (e.g., lunch, sleep)
 
 ### Technical Features
@@ -27,7 +36,7 @@ Expression is a lightweight and highly efficient time based wallpaper auto-selec
 ### Future Features
 
 - [ ] Per group config overrides
-- [ ] Interruptable Sleep Cycle
+- [ ] Interruptible Sleep Cycle
 - [ ] Randomization Scopes:
   - [x] Within Current Group
   - [ ] Within Current Collection
@@ -54,7 +63,17 @@ Expression was initially a simple bash script for timed wallpapers. However, it 
 ### Build and Install
 
 ```sh
+# Clone the repository
+git clone https://github.com/MidHunterX/Expression.git
+cd Expression
+
+# Build the project
 cargo build --release
+
+# Create config directory if it doesn't exist
+mkdir -p ~/.config/expression
+
+# Copy the binary to your local bin directory
 cp target/release/expression ~/.local/bin/
 ```
 
@@ -115,7 +134,7 @@ special = "~/Pictures/Wallpapers/Special"
 
 ## 📚 Concepts
 
-Expression works by treating wallpapers as a single unit; whether is is a file
+Expression works by treating wallpapers as a single unit; whether it is a file
 or multiple files grouped into a directory.
 
 ### Wallpaper Items
@@ -198,7 +217,7 @@ special = "~/Pictures/Wallpapers/Special/"
 23 = "sleep_time"
 ```
 
-## 🍨 Use Cases
+## 🍨 Use Cases & Creative Ideas
 
 ### 24 hour cycle
 
@@ -216,9 +235,9 @@ You can set up your wallpaper directory like this:
 
 Note: numbers without preceeding 0 is valid too. For e.g.: `3.png`
 
-### Don/t like renaming?
+### Don't like renaming?
 
-Renaming wallpapers to numbers can get a little bit tedious especially when you want to change it into a different time. There's a solution for that. Since directories are also a valid wallpaper _item_, we can use that to our advantage.
+Renaming wallpapers numerically can get a little tedious especially when you want to change it into a different time. There's a solution for that. Since directories are also a valid wallpaper _item_, we can use that to our advantage.
 
 ```
 wallpapers/
@@ -254,7 +273,7 @@ wallpaper_dir/
 ...
 ```
 
-Remember, both directories and files are valid wallpaper items.
+Reminder: both directories and files are valid wallpaper items.
 
 3. Now let's configure which time to run these special wallpaper overrides.
 
