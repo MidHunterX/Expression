@@ -26,6 +26,8 @@ Expression is a lightweight and highly efficient time based wallpaper auto-selec
 
 ### Future Features
 
+- [ ] Per group config overrides
+- [ ] Interruptable Sleep Cycle
 - [ ] Randomization Scopes:
   - [x] Within Current Group
   - [ ] Within Current Collection
@@ -109,15 +111,6 @@ special = "~/Pictures/Wallpapers/Special"
 5 = "rise and shine"
 9 = "workout_motivation"
 23 = "sleep_time"
-
-[backend.custom]
-cmd_check_availability = "backend --version"
-cmd_wallpaper_change = "backend set <img_arguments>"
-supported_extensions = ["jpg", "jpeg", "png", "gif"]
-
-[backend.swww]
-post_command = ~/.config/waypaper/post_wallpaper_change.sh $wallpaper
-img_arguments = "--transition-type fade"
 ```
 
 ## 📚 Concepts
@@ -202,6 +195,73 @@ special = "~/Pictures/Wallpapers/Special/"
 [special_entries]
 5 = "rise and shine"
 9 = "workout_motivation"
+23 = "sleep_time"
+```
+
+## 🍨 Use Cases
+
+### 24 hour cycle
+
+Want a simple 24 hour timecycle wallpaper like this?
+
+You can set up your wallpaper directory like this:
+
+```
+00.jpg  03.jpg  06.jpg  09.jpg  12.jpg  15.jpg  18.jpg  21.jpg
+01.jpg  04.jpg  07.jpg  10.jpg  13.jpg  16.jpg  19.jpg  22.jpg
+02.jpg  05.jpg  08.jpg  11.jpg  14.jpg  17.jpg  20.jpg  23.jpg
+```
+
+`00.jpg` _item_ is used for 00 to 01 and `23.jpg` _item_ is used for 23 to 00
+
+Note: numbers without preceeding 0 is valid too. For e.g.: `3.png`
+
+### Don/t like renaming?
+
+Renaming wallpapers to numbers can get a little bit tedious especially when you want to change it into a different time. There's a solution for that. Since directories are also a valid wallpaper _item_, we can use that to our advantage.
+
+```
+wallpapers/
+├── 00/
+│   └── Austrian Painter.png
+├── 02/
+│   ├── World Trade Center.jpg
+│   └── Tiananmen Square.jpg
+├── 03/
+│   └── who_is_in_paris.jpg
+...
+```
+
+Now you can easily swap out wallpapers into different times whenever you want. No need to tinker around with their names.
+
+### Timetable Notification
+
+I'd like to get notified if its sleep time or its time for lunch via wallpaper. A truly non-intrusive way of communication 😌. Since I work in a transparent terminal most of the time, the change is quite noticeable too. To do this:
+
+1. Create a directory named `special` in your wallpaper directory
+2. Put wallpapers for `sleep_time` and `lunch` _items_ in `special` directory
+
+```sh
+wallpaper_dir/
+│   special/
+│   ├── lunch/
+│   │   ├── apples.png
+│   │   ├── sushi.jpg
+│   │   └── top_ramen.jpg
+│   └── sleep_time.jpg
+├── 00/
+│   └── Austrian Painter.png
+...
+```
+
+Remember, both directories and files are valid wallpaper items.
+
+3. Now let's configure which time to run these special wallpaper overrides.
+
+```toml
+# Add the names of item (file/dir) along with the time to your config in special_entries
+[special_entries]
+13 = "lunch"
 23 = "sleep_time"
 ```
 
