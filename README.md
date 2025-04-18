@@ -4,15 +4,6 @@
 
 _Time-based, rule-driven wallpaper automation for Wayland (and more!)_
 
-## 🧾 TL;DR
-
-Expression is a time-based wallpaper engine that:
-
-- Switches wallpapers hourly (or randomly)
-- Works with `swww` (Wayland) or `feh` (X11)
-- Uses simple TOML config
-- Supports "special" wallpaper overrides (like sleep/lunch reminders)
-
 ## ⛲ Features
 
 ### Main Features
@@ -142,7 +133,7 @@ or multiple files grouped into a directory.
 ### Wallpaper Items
 
 - **Entry** – A single wallpaper file named after the hour (e.g., `07.jpg`).
-- **Group** – A folder containing multiple wallpapers, named after the hour (e.g., `07/`).
+- **Group** – A directory containing multiple wallpapers, named after the hour (e.g., `07/`).
 
 ```sh
 wallpaper_dir/
@@ -219,15 +210,15 @@ special = "~/Pictures/Wallpapers/Special/"
 23 = "sleep_time"
 ```
 
-## 🍨 Use Cases & Creative Ideas
+## Use Cases & Creative Ideas
 
-### 24 hour cycle
+### ⌛ 24 hour cycle
 
 Want a simple 24 hour timecycle wallpaper like this?
 
 You can set up your wallpaper directory like this:
 
-```
+```c
 00.jpg  03.jpg  06.jpg  09.jpg  12.jpg  15.jpg  18.jpg  21.jpg
 01.jpg  04.jpg  07.jpg  10.jpg  13.jpg  16.jpg  19.jpg  22.jpg
 02.jpg  05.jpg  08.jpg  11.jpg  14.jpg  17.jpg  20.jpg  23.jpg
@@ -237,11 +228,11 @@ You can set up your wallpaper directory like this:
 
 Note: numbers without preceeding 0 is valid too. For e.g.: `3.png`
 
-### Don't like renaming?
+### 📛 Don't like renaming?
 
 Renaming wallpapers numerically can get a little tedious especially when you want to change it into a different time. There's a solution for that. Since directories are also a valid wallpaper _item_, we can use that to our advantage.
 
-```
+```sh
 wallpapers/
 ├── 00/
 │   └── Austrian Painter.png
@@ -253,9 +244,9 @@ wallpapers/
 ...
 ```
 
-Now you can easily swap out wallpapers into different times whenever you want. No need to tinker around with their names.
+Now you can freely move wallpapers between hours without worrying about filenames.
 
-### Timetable Notification
+### 📌 Timetable Notification
 
 I'd like to get notified if its sleep time or its time for lunch via wallpaper. A truly non-intrusive way of communication 😌. Since I work in a transparent terminal most of the time, the change is quite noticeable too. To do this:
 
@@ -265,17 +256,13 @@ I'd like to get notified if its sleep time or its time for lunch via wallpaper. 
 ```sh
 wallpaper_dir/
 │   special/
-│   ├── lunch/
-│   │   ├── apples.png
-│   │   ├── sushi.jpg
-│   │   └── top_ramen.jpg
+│   ├── top_ramen.jpg
 │   └── sleep_time.jpg
+│
 ├── 00/
 │   └── Austrian Painter.png
 ...
 ```
-
-Pro Tip: Both directories and files are valid wallpaper items; mix and match as needed.
 
 3. Now let's configure which time to run these special wallpaper overrides.
 
@@ -285,6 +272,45 @@ Pro Tip: Both directories and files are valid wallpaper items; mix and match as 
 13 = "lunch"
 23 = "sleep_time"
 ```
+
+### 😴 Progressively Sleepy PC
+
+Okay the sleep_time wallpaper shows up at exactly 23:00 and then that's about it.
+
+But what if your wallpapers could become progressively sleepier as the hour passes?
+
+Let’s set that up.
+
+1. Create a `sleep_time` directory inside the special directory, and add multiple progressively sleepy wallpapers:
+
+```sh
+wallpaper_dir/
+│   special/
+│   ├── top_ramen.jpg
+│   ├── sleep_time/
+│   │   ├── sleepy_1.jpg
+│   │   ├── sleepy_2.jpg
+│   │   ├── ...
+│   │   └── sleepy_10.jpg
+...
+```
+
+2. Now let's configure those to spread out throughout the sleep hour.
+
+```toml
+[general]
+group_selection_strategy = "spread"  # Applies spread strategy to all directories
+
+[special_entries]
+13 = "lunch"
+23 = "sleep_time"
+```
+
+And just like that, your system gently drifts into dreamland with you 🌙
+
+> [!WARNING]
+> group_selection_strategy can currently only be set globally in [general],
+> so all directories will use spread until per-group support is added.
 
 ## 📜 License
 
