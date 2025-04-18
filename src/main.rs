@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _log2 = logger::init();
     debug!("----------------------------------");
 
-    // Backend Initialization
+    // SETUP: Backend
     let backend = get_backend(&config.general.backend)?;
     let backend_name = backend.name();
     let extensions = backend.supported_extensions();
@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         format!("{:?}", start.elapsed()).blue()
     );
 
-    // Config Variables
+    // SETUP: Config Variables
     let wallpaper_dir = config.directories.wallpaper.as_str();
     // Don't worry, JFK won't get executed here because defaults come from config
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
@@ -42,6 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut selected_item = Vec::new();
 
+    // SETUP: Signal Handler
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
     ctrlc::set_handler(move || {
@@ -51,6 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     })
     .expect("Error setting Ctrl-C handler");
 
+    // MAIN: Main Loop
     while running.load(Ordering::SeqCst) {
         let start = Instant::now();
         let now = Local::now();
@@ -116,7 +118,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // SELECT: Fixed Time Strategy
             backend.apply_wallpaper(&selected_item[0])?;
             info!(
-                "Wallpaper (entry) applied: {}",
+                "Wallpaper applied: {}",
                 std::path::Path::new(&selected_item[0])
                     .file_name()
                     .and_then(|name| name.to_str())
