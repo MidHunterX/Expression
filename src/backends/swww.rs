@@ -10,9 +10,10 @@ impl SwwwBackend {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         // CASE: swww already up and running
         if Self::is_available() {
+            sleep(Duration::from_secs(1)); // prevent false positives
             return Ok(Self);
         }
-        // CASE: swww loading on startup
+        // CASE: either it's linux running on microwave or swww is not initialized
         for _ in 0..5 {
             if Self::is_available() {
                 sleep(Duration::from_secs(1));
