@@ -2,7 +2,7 @@ use chrono::{Local, Timelike};
 use colored::Colorize;
 use ctrlc;
 use expression::backends::get_backend;
-use expression::config::{Config, GroupSelectionStrategy};
+use expression::config::{get_group_config, Config, GroupSelectionStrategy};
 use expression::utils::{calc, logger, wallpaper};
 use log2::{debug, error, info, warn};
 use std::process;
@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let config_special_entries = config.special_entries;
     let config_special_enabled = config.general.enable_special;
-    let config_group_selection = config.general.group_selection_strategy;
+    let mut config_group_selection = config.general.group_selection_strategy;
 
     let mut selected_item = Vec::new();
 
@@ -81,9 +81,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(special_items) => {
                     if let Some(filename) = config_special_entries.get(&hour.to_string()) {
                         if let Some(item) = special_items.get(filename) {
-                            info!("Special Collection Activated!");
-                            // TODO: select_wallpaper_item return Vector if sub-config exists
+                            // Check Group Config
+                            if let Some(group_config) = get_group_config(item) {
+                                if let Some(general) = group_config.general {
+                                    match general.selection_strategy {
+                                        Some(strategy) => {
+                                            config_group_selection = strategy;
+                                            debug!("Using Group specific Config overrides");
+                                        }
+                                        None => (),
+                                    };
+                                }
+                            }
+
                             selected_item = wallpaper::select_wallpaper_item(item, extensions);
+                            info!("Special Collection Activated!");
                         }
                     }
                 }
@@ -97,7 +109,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if selected_item.is_empty() {
             let items = wallpaper::get_wallpaper_items(wallpaper_dir, extensions, Some(hour))?;
             if let Some(item) = items.get(&hour) {
-                // TODO: select_wallpaper_item return Vector if sub-config exists
+                // Check Group Config
+                if let Some(group_config) = get_group_config(item) {
+                    if let Some(general) = group_config.general {
+                        match general.selection_strategy {
+                            Some(strategy) => {
+                                config_group_selection = strategy;
+                                debug!("Using Group specific Config overrides");
+                            }
+                            None => (),
+                        };
+                    }
+                }
+
                 selected_item = wallpaper::select_wallpaper_item(item, extensions);
             }
         }

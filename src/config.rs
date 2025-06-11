@@ -114,3 +114,47 @@ fn expand_path(path: &str) -> String {
         .unwrap_or_else(|_| path.into())
         .into_owned()
 }
+
+// █▀▀ █▀█ █▀█ █░█ █▀█   █▀▀ █▀█ █▄░█ █▀▀ █ █▀▀
+// █▄█ █▀▄ █▄█ █▄█ █▀▀   █▄▄ █▄█ █░▀█ █▀░ █ █▄█
+// Override Config for Wallpaper Groups
+
+use crate::utils::wallpaper::WallpaperItem;
+use log2::error;
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct GroupConfig {
+    pub general: Option<GeneralGroupConfig>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct GeneralGroupConfig {
+    pub selection_strategy: Option<GroupSelectionStrategy>,
+}
+
+/// Selects config from the first Group in the list of WallpaperItem.
+/// Returns None if there is no Group or config.toml is not present/invalid.
+pub fn get_group_config(current_wallpaper_items: &Vec<WallpaperItem>) -> Option<GroupConfig> {
+    let config_file = "config.toml";
+    for item in current_wallpaper_items {
+        if let WallpaperItem::Group(path) = item {
+            let config_path = path.join(config_file);
+            if config_path.exists() && config_path.is_file() {
+                match fs::read_to_string(&config_path) {
+                    Ok(content) => match toml::from_str::<GroupConfig>(&content) {
+                        Ok(config) => return Some(config),
+                        Err(err) => {
+                            error!("Failed to parse {}: {}", config_path.display(), err);
+                            return None;
+                        }
+                    },
+                    Err(err) => {
+                        error!("Failed to read {}: {}", config_path.display(), err);
+                        return None;
+                    }
+                }
+            }
+        }
+    }
+    None
+}

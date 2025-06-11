@@ -101,6 +101,7 @@ pub fn get_wallpaper_items(
 
         if let Some(filename) = filename {
             if let Ok(hour) = filename.parse::<u8>() {
+                // Invalid Entry/Group name
                 if hour >= 24 {
                     continue;
                 }

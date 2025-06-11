@@ -2,7 +2,7 @@
 
 # Expression
 
-_Time-based, rule-driven wallpaper automation for Wayland (and more!)_
+"This is the best 24-hour automatic wallpaper setter you could've ever asked for." - sis
 
 ## ⛲ Features
 
@@ -14,40 +14,12 @@ _Time-based, rule-driven wallpaper automation for Wayland (and more!)_
 - [x] Set random wallpaper from a group of wallpapers for a specific hour
 - [x] Distribute wallpapers from a group evenly across the hour
 - [x] Override with special wallpaper based on a timetable (e.g., lunch, sleep)
-
-### Technical Features
-
-- [x] TOML-based configuration system
-- [x] Background service/daemon support
-- [x] Hierarchical wallpaper organization:
-  - Root-level: Collections (e.g., Wallpapers, Catppuccin, Gruvbox, Not_SFW, Dark_Mode)
-  - Mid-level: Time-based Wallpaper Items (Entries and Groups)
-  - Leaf-level: Wallpapers (image files)
-
-### Future Features
-
-- [ ] Per group config overrides
-- [ ] Interruptible Sleep Cycle
-- [ ] Randomization Scopes:
-  - [x] Within Current Group
-  - [ ] Within Current Collection
-  - [ ] Across all Collections (excluding Special)
-  - [ ] Across all Wallpapers (excluding Special)
-- [ ] Spread collection of wallpapers throughout the day
-- [x] Spread group of wallpapers throughout an hour
-- [ ] Efficient, event-driven execution (no polling or sleeps)
-- [ ] Interactive Terminal User Interface (TUI) Configurator
-- [ ] Inter Process Communication (IPC) support for external control or dynamic updates
-
-## 🤷 Why?
-
-This project began as a simple Bash script for timed wallpapers, but quickly became unmaintainable as feature requests grew. This Rust rewrite solves that with maintainability, performance, and scalability in mind.
+- [x] Per group config overrides
 
 ## 🚀 Installation
 
 ### Prerequisites
 
-- Rust (Latest stable version)
 - A supported wallpaper setter (`swww`, `feh`)
 - Configuration file (`~/.config/expression/config.toml`)
 
@@ -210,9 +182,9 @@ special = "~/Pictures/Wallpapers/Special/"
 23 = "sleep_time"
 ```
 
-## Use Cases & Creative Ideas
+## Use Cases
 
-### ⌛ 24 hour cycle
+### ⌛ 24 hour cycle (Fixed Wallpaper)
 
 Want a simple 24 hour timecycle wallpaper like this?
 
@@ -237,7 +209,6 @@ wallpapers/
 ├── 00/
 │   └── Austrian Painter.png
 ├── 02/
-│   ├── World Trade Center.jpg
 │   └── Tiananmen Square.jpg
 ├── 03/
 │   └── who_is_in_paris.jpg
@@ -246,9 +217,9 @@ wallpapers/
 
 Now you can freely move wallpapers between hours without worrying about filenames.
 
-### 📌 Timetable Notification
+### 📌 A Visual Timetable (Wallpaper Override)
 
-I'd like to get notified if its sleep time or its time for lunch via wallpaper. A truly non-intrusive way of communication 😌. Since I work in a transparent terminal most of the time, the change is quite noticeable too. To do this:
+I'd like to get notified if its sleep time or its time for lunch via wallpaper. A truly non-intrusive way of communication. Since I work in a transparent terminal most of the time, the change is quite noticeable too. To do this:
 
 1. Create a directory named `special` in your wallpaper directory
 2. Put wallpapers for `sleep_time` and `lunch` _items_ in `special` directory
@@ -256,7 +227,7 @@ I'd like to get notified if its sleep time or its time for lunch via wallpaper. 
 ```sh
 wallpaper_dir/
 │   special/
-│   ├── top_ramen.jpg
+│   ├── eating_ramyeon.jpg
 │   └── sleep_time.jpg
 │
 ├── 00/
@@ -269,11 +240,11 @@ wallpaper_dir/
 ```toml
 # Add the names of item (file/dir) along with the time to your config in special_entries
 [special_entries]
-13 = "lunch"
+13 = "eating_ramyeon"
 23 = "sleep_time"
 ```
 
-### 😴 Progressively Sleepy PC
+### 😴 Progressively Sleepy PC (Spread Wallpapers)
 
 Okay the sleep_time wallpaper shows up at exactly 23:00 and then that's about it.
 
@@ -286,7 +257,7 @@ Let’s set that up.
 ```sh
 wallpaper_dir/
 │   special/
-│   ├── top_ramen.jpg
+│   ├── eating_ramyeon.jpg
 │   ├── sleep_time/
 │   │   ├── sleepy_1.jpg
 │   │   ├── sleepy_2.jpg
@@ -295,22 +266,22 @@ wallpaper_dir/
 ...
 ```
 
-2. Now let's configure those to spread out throughout the sleep hour.
+2. Now let's configure that specific group to spread out throughout the sleep hour. Create a file named `config.toml` inside your group (e.g., `sleep_time/`) with the following content:
 
 ```toml
 [general]
-group_selection_strategy = "spread"  # Applies spread strategy to all directories
+selection_strategy = "spread"  # Applies spread strategy to the group only
+```
 
+3. Make sure the name of the directory (e.g., `sleep_time`) is added to the `special_entries` section.
+
+```toml
 [special_entries]
-13 = "lunch"
+13 = "eating_ramyeon"
 23 = "sleep_time"
 ```
 
 And just like that, your system gently drifts into dreamland with you 🌙
-
-> [!WARNING]
-> group_selection_strategy can currently only be set globally in [general],
-> so all directories will use spread until per-group support is added.
 
 ## 📜 License
 
