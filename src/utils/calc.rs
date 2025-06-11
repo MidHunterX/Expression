@@ -107,31 +107,33 @@ pub fn sleep(wait_seconds: u64) {
 /// 8m  : 9     |    8h  : 15
 /// 16m : 10    |    16h : 16
 /// 32m : 11    |    32h : 17
-pub fn refresh_t2(interval: f64, start_time: DateTime<Local>, wait_seconds: u64) {
+pub fn refresh_tlog2(interval: f64, start_time: DateTime<Local>, wait_seconds: u64) {
     let mut previous_wait = wait_seconds;
     let mut current_wait = wait_seconds;
 
     while current_wait > 1 {
         // Calculate refresh seconds
-        let refresh_wait = current_wait / 2;
+        current_wait /= 2;
         debug!(
             "Rechecking in {}...",
-            if refresh_wait > 60 {
+            if current_wait > 60 {
                 format!(
                     "{} {}",
-                    format!("{}m", refresh_wait / 60).cyan(),
-                    format!("{}s", refresh_wait % 60).cyan()
+                    format!("{}m", current_wait / 60).cyan(),
+                    format!("{}s", current_wait % 60).cyan()
                 )
             } else {
-                format!("{}s", format!("{refresh_wait}").cyan())
+                format!("{}s", format!("{current_wait}").cyan())
             }
         );
-        sleep(refresh_wait);
+        sleep(current_wait);
 
-        // Recalculate wait seconds
+        // Recalculate total wait seconds
         let now = Local::now();
         let (hour_changed, new_wait) = refresh_time(interval, start_time, now);
 
+        // If the hour is changed, it probably means it's the next hour
+        // So, break the wait cycle for executing the next wallpaper.
         if hour_changed {
             debug!("Hour changed: {}", now.hour());
             break;

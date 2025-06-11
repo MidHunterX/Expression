@@ -64,7 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // █▀▀ █▀█ █░░ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
         // █▄▄ █▄█ █▄▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
-        // Wallpaper Collection and Selection
+        // Capture Current Collection Content
 
         // TODO: Collection: Theme Override Strategy
         /* let collections = wallpaper::get_collections(wallpaper_dir)?;
@@ -82,6 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     if let Some(filename) = config_special_entries.get(&hour.to_string()) {
                         if let Some(item) = special_items.get(filename) {
                             info!("Special Collection Activated!");
+                            // TODO: select_wallpaper_item return Vector if sub-config exists
                             selected_item = wallpaper::select_wallpaper_item(item, extensions);
                         }
                     }
@@ -96,13 +97,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if selected_item.is_empty() {
             let items = wallpaper::get_wallpaper_items(wallpaper_dir, extensions, Some(hour))?;
             if let Some(item) = items.get(&hour) {
+                // TODO: select_wallpaper_item return Vector if sub-config exists
                 selected_item = wallpaper::select_wallpaper_item(item, extensions);
             }
         }
 
         // █▀ █▀▀ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
         // ▄█ ██▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
-        // Wallpaper Selection and Aplication
+        // Strategically Select Suitable Scene
 
         // Wallpaper Selection Strategies
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
@@ -176,7 +178,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // █░█░█ ▄▀█ █ ▀█▀ █ █▄░█ █▀▀
         // ▀▄▀▄▀ █▀█ █ ░█░ █ █░▀█ █▄█
-        // Wait Time and Checks
+        // Wistful Wake Wait Workflow
 
         // Wait: 24 Hour Cycle Strategy
         let wait_seconds = calc::wait_time(interval, now);
@@ -212,7 +214,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 calc::sleep(wait_seconds);
             }
             RefreshStrategy::Log2Sleep => {
-                calc::refresh_t2(interval, now, wait_seconds);
+                calc::refresh_tlog2(interval, now, wait_seconds);
             }
         }
     }
