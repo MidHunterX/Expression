@@ -10,17 +10,17 @@ impl SwwwBackend {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         // CASE: swww already up and running
         if Self::is_available() {
-            sleep(Duration::from_secs(1)); // prevent false positives
+            sleep(Duration::from_millis(20)); // prevent race condition
             return Ok(Self);
         }
-        // CASE: either it's linux running on microwave or swww is not initialized
+        // CASE: either it's linux running on microwave
         for _ in 0..5 {
+            sleep(Duration::from_secs(1));
             if Self::is_available() {
-                sleep(Duration::from_secs(1));
                 return Ok(Self);
             }
-            sleep(Duration::from_secs(1));
         }
+        // CASE: or swww is not initialized
         Err(("swww is not installed or running").into())
     }
 
