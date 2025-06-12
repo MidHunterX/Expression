@@ -301,3 +301,11 @@ Expression is licensed under the **GNU Affero GPL v3**, ensuring all modificatio
 ## 🙌 Contributing
 
 Contributions are welcome! Feel free to submit issues or pull requests.
+
+---
+
+<sup>
+  Backstory: It's the year 2025 AD (Gregorian Calendar) and I was just a guy who was writing bash script to automate timed wallpapers with the help of swww daemon. But, this is still not what I really envisioned. Adding more features became a hassle. No more duct-taping and workarounds for datastructures! I have to re-write this into a performant compiled language so that I can have more features while being lightweight and resource efficient focusing on Laptop battery life.
+  So, I want a language re-write which focuses on code maintainability, high performance, low resource utilization and scalability. I had one language in mind: C. Simple and Efficient. Since I have a little bit extra features in mind, datastructures, memory management and data processing could get verbose. This led me to try out Rust lang which gives similar performance while giving memory safety by default.
+  Thus, Expression transcended into this world; A 24 hour ambient notification system disguised as a wallpaper setting program engineered to be lightweight, performant while using as little battery as possible.
+</sup>
