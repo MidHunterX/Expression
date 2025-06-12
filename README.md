@@ -2,7 +2,9 @@
 
 # Expression
 
-"This is the best 24-hour automatic wallpaper setter you could've ever asked for." - sis
+Expression is a highly customizable, time-aware wallpaper engine for Linux. It allows you to automate desktop wallpaper changes based on the current hour, randomly or evenly spread wallpapers from grouped directories, and define overrides for special times like sleep, lunch, or focus hours. Whether you want a subtle visual timetable or an expressive ambience that changes with your day, Expression makes your desktop emotionally intelligent.
+
+> "This is the best 24-hour automatic wallpaper setter you could've ever asked for." - sis
 
 ## ⛲ Features
 
@@ -20,8 +22,7 @@
 
 ### Prerequisites
 
-- A supported wallpaper setter (`swww`, `feh`)
-- Configuration file (`~/.config/expression/config.toml`)
+- Make sure you have a supported wallpaper setter (`swww`, `feh`) installed
 
 ### Build and Install
 
@@ -36,8 +37,18 @@ cargo build --release
 # Create config directory if it doesn't exist
 mkdir -p ~/.config/expression
 
-# Copy the binary to your local bin directory
+# Copy the binary to your local/global bin directory
 cp target/release/expression ~/.local/bin/
+```
+
+- Create a configuration file: `~/.config/expression/config.toml` with the following content
+
+```toml
+[general]
+backend = "swww"
+
+[directories]
+wallpaper = "~/Pictures/wallpaper_dir/"
 ```
 
 ## 👟 Usage
