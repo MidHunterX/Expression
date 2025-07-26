@@ -206,9 +206,9 @@ special = "~/Pictures/Wallpapers/Special/"
 23 = "sleep_time"
 ```
 
-## Use Cases
+## 🔥 Use Cases
 
-### ⌛ 24 hour cycle (Fixed Wallpaper)
+### 24 hour cycle (Fixed Wallpaper)
 
 Want a simple 24 hour timecycle wallpaper like this?
 
@@ -224,7 +224,7 @@ You can set up your wallpaper directory like this:
 
 Note: numbers without preceeding 0 is valid too. For e.g.: `3.png`
 
-### 📛 Don't like renaming?
+### Don't like renaming?
 
 Renaming wallpapers numerically can get a little tedious especially when you want to change it into a different time. There's a solution for that. Since directories are also a valid wallpaper _item_, we can use that to our advantage.
 
@@ -241,7 +241,7 @@ wallpapers/
 
 Now you can freely move wallpapers between hours without worrying about filenames.
 
-### 📌 A Visual Timetable (Wallpaper Override)
+### A Visual Timetable (Wallpaper Override)
 
 I'd like to get notified if its sleep time or its time for lunch via wallpaper. A truly non-intrusive way of communication. Since I work in a transparent terminal most of the time, the change is quite noticeable too. To do this:
 
@@ -268,7 +268,7 @@ wallpaper_dir/
 23 = "sleep_time"
 ```
 
-### 😴 Progressively Sleepy PC (Spread Wallpapers)
+### Progressively Sleepy PC (Spread Wallpapers)
 
 Okay the sleep_time wallpaper shows up at exactly 23:00 and then that's about it.
 
