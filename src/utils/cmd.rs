@@ -8,7 +8,7 @@ use std::process::{Command, Output};
 /// * `Result<Output, io::Error>` - The command output or an error
 /// # Example
 /// ```
-/// use expression::utils::command::execute_shell_command;
+/// use expression::utils::cmd::execute;
 ///
 /// let result = execute("ls -la");
 /// match result {
