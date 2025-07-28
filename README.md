@@ -17,6 +17,7 @@ Expression is a highly customizable, time-aware wallpaper engine for Linux. It a
 - [x] Distribute wallpapers from a group evenly across the hour
 - [x] Override with special wallpaper based on a timetable (e.g., lunch, sleep)
 - [x] Per group config overrides
+- [x] Execute custom scripts on wallpaper change
 
 ## 🚀 Installation
 
@@ -106,6 +107,10 @@ backend = "swww"
 enable_special = true
 # Way to select wallpaper from a group: random, spread
 group_selection_strategy = "random"
+# Command to execute on wallpaper change
+# Examples:
+# execute_on_change = "~/.scripts/custom_script.sh"
+execute_on_change = "notify-send 'Wallpaper Changed'"
 
 [directories]
 # Default wallpaper directory

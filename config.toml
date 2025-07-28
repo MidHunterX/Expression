@@ -2,6 +2,7 @@
 backend = "swww"
 enable_special = true
 group_selection_strategy = "random" # random, spread
+# execute_on_change = "/path/to/script_or_executable"
 
 [directories]
 wallpaper = "~/Pictures/"

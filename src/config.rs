@@ -23,6 +23,7 @@ pub struct GeneralConfig {
     pub backend: String,
     pub enable_special: bool,
     pub group_selection_strategy: GroupSelectionStrategy,
+    pub execute_on_change: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

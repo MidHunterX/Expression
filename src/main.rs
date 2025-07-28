@@ -3,7 +3,7 @@ use colored::Colorize;
 use ctrlc;
 use expression::backends::get_backend;
 use expression::config::{get_group_config, Config, GroupSelectionStrategy};
-use expression::utils::{calc, logger, wallpaper};
+use expression::utils::{calc, cmd, logger, wallpaper};
 use log2::{debug, error, info, warn};
 use std::process;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -39,6 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config_special_entries = config.special_entries;
     let config_special_enabled = config.general.enable_special;
     let mut config_group_selection = config.general.group_selection_strategy;
+    let exec_cmd = config.general.execute_on_change;
 
     let mut selected_item = Vec::new();
 
@@ -232,13 +233,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
 
-        // REFRESH
+        // REFRESH LOOP
         match refresh_strategy {
-            RefreshStrategy::Sleep => {
-                calc::sleep(wait_seconds);
-            }
-            RefreshStrategy::Log2Sleep => {
-                calc::refresh_tlog2(interval, now, wait_seconds);
+            RefreshStrategy::Sleep => calc::sleep(wait_seconds),
+            RefreshStrategy::Log2Sleep => calc::refresh_tlog2(interval, now, wait_seconds),
+        }
+
+        // EXECUTE SCRIPT
+        if exec_cmd.is_some() {
+            let result = cmd::execute(exec_cmd.as_ref().unwrap());
+            match result {
+                Ok(_) => {}
+                Err(err) => error!("Error executing command: {}", err),
             }
         }
     }
