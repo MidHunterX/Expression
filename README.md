@@ -21,12 +21,23 @@ Expression is a highly customizable, time-aware wallpaper engine for Linux. It a
 
 ## 🚀 Installation
 
-### Step 1: Prerequisites
+Make sure you have a supported wallpaper setter (`swww`, `feh`) installed
 
-- Make sure you have a supported wallpaper setter (`swww`, `feh`) installed
-- `cargo` and `rustup` should be installed for building the project
+### METHOD 1: Give me the EXE
 
-### Step 2: Build and Install
+#### Step 1: Download and Install
+
+[Download](https://github.com/MidHunterX/Expression/releases/latest) the latest release.
+
+#### Step 2: Configure
+
+See [Configuration](#-configuration) section below.
+
+### METHOD 2: Binaries? We don't do that here
+
+`cargo` and `rustup` should be installed for building the project
+
+#### Step 1: Build and Install
 
 Clone the repository
 
@@ -53,17 +64,9 @@ Copy the binary to your local/global bin directory. Be sure to have `~/.local/bi
 cp target/release/expression ~/.local/bin/
 ```
 
-### Step 3: Configure
+#### Step 2: Configure
 
-Create a configuration file: `~/.config/expression/config.toml` with the following content
-
-```toml
-[general]
-backend = "swww"
-
-[directories]
-wallpaper = "~/Pictures/wallpaper_dir/"
-```
+See [Configuration](#-configuration) section below.
 
 ## 👟 Usage
 
@@ -81,7 +84,7 @@ RUST_LOG=debug expression
 
 ## 🔧 Configuration
 
-Expression uses a TOML configuration file located at:
+Create a TOML configuration file at:
 
 ```sh
 ~/.config/expression/config.toml
