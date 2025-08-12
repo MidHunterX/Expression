@@ -10,9 +10,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Instant;
 
-pub enum RefreshStrategy {
-    Sleep,     // Sleeps once for the entire interval
-    Log2Sleep, // Sleeps multiple times in log2 steps
+pub enum WaitStrategy {
+    Sleep,   // Sleeps once for the entire interval
+    Refresh, // Sleeps and recalculates multiple times
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -136,7 +136,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let start = Instant::now();
 
         let mut interval = 60.0; // Minutes
-        let mut refresh_strategy = RefreshStrategy::Log2Sleep;
+        let mut refresh_strategy = WaitStrategy::Refresh;
 
         let item_size = selected_item.len();
         if item_size == 0 {
@@ -176,7 +176,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     );
                     // Overrides
                     interval = slice_duration;
-                    refresh_strategy = RefreshStrategy::Sleep;
+                    refresh_strategy = WaitStrategy::Sleep;
                 }
                 GroupSelectionStrategy::Random => {
                     info!("Multiple wallpapers available for {}", hour);
@@ -235,8 +235,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // REFRESH LOOP
         match refresh_strategy {
-            RefreshStrategy::Sleep => calc::sleep(wait_seconds),
-            RefreshStrategy::Log2Sleep => calc::refresh_tlog2(interval, now, wait_seconds),
+            WaitStrategy::Sleep => calc::sleep(wait_seconds),
+            WaitStrategy::Refresh => calc::refresh(interval, now, wait_seconds),
         }
 
         // EXECUTE SCRIPT

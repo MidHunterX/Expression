@@ -21,10 +21,20 @@ pub fn get_group_index(now: DateTime<Local>, total_groups: usize) -> usize {
     ((seconds as f64 / interval).floor() as usize).min(total_groups - 1)
 }
 
-/// Returns time to wait until next wallpaper refresh time
+/// Calculates how many seconds to wait until the next wallpaper refresh.
+///
+/// The calculation is based on the given interval (in minutes) and the current time.
+/// For example, if the refresh interval is `60.0` (1 hour) and the current time is `14:45:00`,
+/// this function will return `900` (15 minutes) until the next refresh at `15:00:00`.
+///
+/// # Parameters
+/// - `interval`: Refresh interval in **minutes** (can be fractional).
+/// - `now`: The current local time.
+///
+/// # Returns
+/// Number of seconds remaining until the next refresh.
 ///
 /// # Examples
-///
 /// ```rust
 /// use chrono::{Local, TimeZone};
 /// use expression::utils::calc::wait_time;
@@ -44,13 +54,29 @@ pub fn wait_time(interval: f64, now: DateTime<Local>) -> u64 {
     wait as u64
 }
 
-/// Re-calculates refresh time.
-/// Returns `(is_hour_changed, new_wait_seconds)`.
+/// Calculate the remaining time until the next refresh interval minute.
+///
+/// Also detects if the hour has changed between two timestamps.
+/// If the hour changes, the function returns `(true, 0)` to indicate that a refresh
+/// should happen immediately.
+///
+/// # Parameters
+/// - `interval`: Refresh interval in **minutes**.
+/// - `old_now`: The previous recorded time.
+/// - `new_now`: The current time.
+///
+/// # Returns
+/// A tuple:
+/// 1. `is_hour_changed` – `true` if the hour changed between the two timestamps.
+/// 2. `new_wait_seconds` – Number of seconds until the next refresh.
+///
+/// # Edge Cases
+/// - **Time travel** (when `old_now > new_now`) is handled gracefully.
+/// - **Hour change** immediately triggers a refresh.
 ///
 /// # Examples
-///
 /// ```rust
-/// use chrono::{DateTime, Local, TimeZone};
+/// use chrono::{Local, TimeZone};
 /// use expression::utils::calc::refresh_time;
 ///
 /// let interval = 60.0; // 1 hour
@@ -63,7 +89,7 @@ pub fn wait_time(interval: f64, now: DateTime<Local>) -> u64 {
 /// assert_eq!(wait_seconds, 900); // 15 minutes
 /// ```
 pub fn refresh_time(
-    interval: f64,
+    refresh_minute: f64,
     old_now: DateTime<Local>,
     new_now: DateTime<Local>,
 ) -> (bool, u64) {
@@ -79,7 +105,7 @@ pub fn refresh_time(
     }
 
     // Re-calculate refresh time
-    let new_wait_seconds: u64 = wait_time(interval, new_now);
+    let new_wait_seconds: u64 = wait_time(refresh_minute, new_now);
 
     return (is_hour_changed, new_wait_seconds);
 }
@@ -91,13 +117,11 @@ use colored::Colorize;
 use log2::debug;
 use std::{thread, time::Duration};
 
-/// Refresh: T Strategy
 /// Simply waits until next wallpaper refresh time
 pub fn sleep(wait_seconds: u64) {
     thread::sleep(Duration::from_secs(wait_seconds));
 }
 
-/// Refresh: T/2 Strategy
 /// Re-calculates refresh time every T/2 seconds
 /// Mitigates the Sleep/Hibernate issue to an extent without much wakeup calls
 /// Time : Max Polling Rate [log2(refresh_seconds)]
@@ -107,12 +131,11 @@ pub fn sleep(wait_seconds: u64) {
 /// 8m  : 9     |    8h  : 15
 /// 16m : 10    |    16h : 16
 /// 32m : 11    |    32h : 17
-pub fn refresh_tlog2(interval: f64, start_time: DateTime<Local>, wait_seconds: u64) {
+pub fn refresh(interval_minute: f64, start_time: DateTime<Local>, wait_seconds: u64) {
     let mut previous_wait = wait_seconds;
     let mut current_wait = wait_seconds;
 
     while current_wait > 1 {
-        // Calculate refresh seconds
         current_wait /= 2;
         debug!(
             "Rechecking in {}...",
@@ -130,11 +153,11 @@ pub fn refresh_tlog2(interval: f64, start_time: DateTime<Local>, wait_seconds: u
 
         // Recalculate total wait seconds
         let now = Local::now();
-        let (hour_changed, new_wait) = refresh_time(interval, start_time, now);
+        let (is_hour_changed, new_wait) = refresh_time(interval_minute, start_time, now);
 
         // If the hour is changed, it probably means it's the next hour
         // So, break the wait cycle for executing the next wallpaper.
-        if hour_changed {
+        if is_hour_changed {
             debug!("Hour changed: {}", now.hour());
             break;
         }
