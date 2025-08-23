@@ -1,6 +1,4 @@
-// expression crate for testing
-// needs dir/mod.rs to work
-
 pub mod backends;
 pub mod utils;
 pub mod config;
+pub mod core;

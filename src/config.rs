@@ -120,7 +120,7 @@ fn expand_path(path: &str) -> String {
 // █▄█ █▀▄ █▄█ █▄█ █▀▀   █▄▄ █▄█ █░▀█ █▀░ █ █▄█
 // Override Config for Wallpaper Groups
 
-use crate::utils::wallpaper::WallpaperItem;
+use crate::core::wallpaper::WallpaperItem;
 use log2::error;
 
 #[derive(Debug, Deserialize, Clone)]

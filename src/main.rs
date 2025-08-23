@@ -1,9 +1,12 @@
 use chrono::{Local, Timelike};
 use colored::Colorize;
 use ctrlc;
-use expression::backends::get_backend;
-use expression::config::{get_group_config, Config, GroupSelectionStrategy};
-use expression::utils::{calc, cmd, logger, wallpaper};
+use expression::{
+    backends::get_backend,
+    config::{get_group_config, Config, GroupSelectionStrategy},
+    core::wallpaper,
+    utils::{calc, cmd, logger},
+};
 use log2::{debug, error, info, warn};
 use std::process;
 use std::sync::atomic::{AtomicBool, Ordering};

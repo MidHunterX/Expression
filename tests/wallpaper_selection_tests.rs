@@ -1,4 +1,4 @@
-use expression::utils::wallpaper;
+use expression::core::wallpaper;
 use std::fs;
 mod utils;
 use utils::{cleanup_test_dir, setup_test_dir};

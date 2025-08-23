@@ -1,4 +1,4 @@
-use expression::utils::wallpaper;
+use expression::core::wallpaper;
 use std::fs;
 use std::io;
 mod utils;
