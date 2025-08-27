@@ -210,7 +210,8 @@ use log2::info;
 
 /// Selects a random wallpaper from a wallpaper Group.
 /// Returns a tuple of (path, index, total)
-/// WARN: Deprecated
+/// WARN: Deprecated for now. Will be useful in the future
+/// upon implementing global/collection temporary randomization scope
 pub fn select_random_entry(path: &PathBuf, extensions: &[&str]) -> Option<(String, usize, usize)> {
     let sub_collection_dir = path.display().to_string();
     let sub_entries = get_wallpapers(&sub_collection_dir, extensions).ok()?;

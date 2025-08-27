@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::load()?;
 
     let _log2 = logger::init();
-    debug!("----------------------------------");
+    info!("----------------------------------");
 
     // SETUP: Backend
     let backend = get_backend(&config.general.backend)?;

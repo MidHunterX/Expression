@@ -13,7 +13,7 @@ pub fn init() -> log2::Handle {
         let logfile = dirs::state_dir()
             .map(|path| path.join("expression/expression.log"))
             .unwrap();
-        log2::open(logfile.to_str().unwrap())
+        log2::open(logfile.to_str().unwrap()).level("info")
     };
     return builder.start();
 }
