@@ -29,8 +29,12 @@ pub struct GeneralConfig {
 #[derive(Debug, Deserialize)]
 pub struct DirectoryConfig {
     pub wallpaper: String,
-    pub special: Option<String>,
-    pub collections: Option<String>,
+
+    #[serde(default)]
+    pub special: String,
+
+    #[serde(default)]
+    pub collections: String,
 }
 
 impl Config {
@@ -53,29 +57,23 @@ impl Config {
 
         let mut config: Config = toml::from_str(&config_str)?;
 
-        if config.directories.special.is_none() {
-            let wallpaper_path = Path::new(&config.directories.wallpaper);
-            config.directories.special = Some(
-                wallpaper_path
-                    .join("special")
-                    .to_string_lossy()
-                    .into_owned(),
-            );
+        let wallpaper_path = Path::new(&config.directories.wallpaper);
+
+        if config.directories.special.is_empty() {
+            config.directories.special = wallpaper_path
+                .join("special")
+                .to_string_lossy()
+                .into_owned();
         }
 
-        if config.directories.collections.is_none() {
-            let wallpaper_path = Path::new(&config.directories.wallpaper);
-            config.directories.collections = Some(wallpaper_path.to_string_lossy().into_owned());
+        if config.directories.collections.is_empty() {
+            config.directories.collections = wallpaper_path.to_string_lossy().into_owned();
         }
 
         // Expand dir paths
         config.directories.wallpaper = expand_path(&config.directories.wallpaper);
-        config.directories.special = config.directories.special.as_ref().map(|p| expand_path(p));
-        config.directories.collections = config
-            .directories
-            .collections
-            .as_ref()
-            .map(|p| expand_path(p));
+        config.directories.special = expand_path(&config.directories.special);
+        config.directories.collections = expand_path(&config.directories.collections);
 
         Ok(config)
     }

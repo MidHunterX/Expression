@@ -41,11 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // SETUP: Config Variables
     let wallpaper_dir = config.directories.wallpaper.as_str();
-    let mut special_dir = String::new();
-    match config.directories.special {
-        Some(dir) => special_dir = dir.as_str().to_string(),
-        None => (), // Defaults are set in config initialization
-    }
+    let special_dir = config.directories.special;
     let config_special_entries = config.special_entries;
     let config_special_enabled = config.general.enable_special;
     let config_group_strategy = config.general.group_selection_strategy;
