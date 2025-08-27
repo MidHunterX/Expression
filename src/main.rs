@@ -13,6 +13,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Instant;
 
+const DEFAULT_INTERVAL_MINUTES: f64 = 60.0;
+const SECONDS_PER_HOUR: u64 = 3600;
+const SECONDS_PER_MINUTE: u64 = 60;
+
 pub enum WaitStrategy {
     Sleep,   // Sleeps once for the entire interval
     Refresh, // Sleeps and recalculates multiple times
@@ -135,7 +139,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug!("Exec Time: {}", format!("{:?}", start.elapsed()).cyan());
         let start = Instant::now();
 
-        let mut interval = 60.0; // Minutes
+        let mut interval = DEFAULT_INTERVAL_MINUTES;
         let mut refresh_strategy = WaitStrategy::Refresh;
 
         let item_size = selected_item.len();
@@ -211,9 +215,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "Waiting for: {}",
             format!(
                 "{:02}:{:02}:{:02}",
-                wait_seconds / 3600,
-                (wait_seconds % 3600) / 60,
-                wait_seconds % 60,
+                wait_seconds / SECONDS_PER_HOUR,
+                (wait_seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE,
+                wait_seconds % SECONDS_PER_MINUTE,
             )
             .bright_purple()
         );
