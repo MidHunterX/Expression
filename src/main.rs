@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
     let config_special_entries = config.special_entries;
     let config_special_enabled = config.general.enable_special;
-    let mut config_group_selection = config.general.group_selection_strategy;
+    let config_group_strategy = config.general.group_selection_strategy;
     let exec_cmd = config.general.execute_on_change;
 
     let mut selected_item = Vec::new();
@@ -66,6 +66,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             format!("{}", now.format("%H:%M:%S")).bright_purple()
         );
 
+        let mut current_strategy = config_group_strategy.clone();
+
         // █▀▀ █▀█ █░░ █░░ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
         // █▄▄ █▄█ █▄▄ █▄▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█
         // Capture Current Collection Content
@@ -80,53 +82,45 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // COLLECTION: Special Collection
         if selected_item.is_empty() && config_special_enabled {
-            let special_items_result = wallpaper::get_special_items(special_dir, extensions);
-            match special_items_result {
+            match wallpaper::get_special_items(special_dir, extensions) {
                 Ok(special_items) => {
                     if let Some(filename) = config_special_entries.get(&hour.to_string()) {
                         if let Some(item) = special_items.get(filename) {
-                            // Check Group Config
-                            if let Some(group_config) = get_group_config(item) {
-                                if let Some(general) = group_config.general {
-                                    match general.selection_strategy {
-                                        Some(strategy) => {
-                                            config_group_selection = strategy;
-                                            debug!("Using Group specific Config overrides");
-                                        }
-                                        None => (),
-                                    };
-                                }
-                            }
-
                             selected_item = wallpaper::select_wallpaper_item(item, extensions);
                             info!("Special Collection Activated!");
+
+                            // Local Group Config Overrides
+                            if let Some(local_config) = get_group_config(item) {
+                                if let Some(local_general) = local_config.general {
+                                    if let Some(local_strategy) = local_general.selection_strategy {
+                                        current_strategy = local_strategy;
+                                        debug!("Using Group specific Config overrides");
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-                Err(err) => {
-                    error!("Special Collection Error: {}", err);
-                }
+                Err(err) => error!("Special Collection Error: {}", err),
             }
         }
 
         // COLLECTION: Normal Collection
         if selected_item.is_empty() {
+            // Since this is the most important feature of all, propogate error and break if it fails
             let items = wallpaper::get_wallpaper_items(wallpaper_dir, extensions, Some(hour))?;
             if let Some(item) = items.get(&hour) {
-                // Check Group Config
-                if let Some(group_config) = get_group_config(item) {
-                    if let Some(general) = group_config.general {
-                        match general.selection_strategy {
-                            Some(strategy) => {
-                                config_group_selection = strategy;
-                                debug!("Using Group specific Config overrides");
-                            }
-                            None => (),
-                        };
+                selected_item = wallpaper::select_wallpaper_item(item, extensions);
+
+                // Local Group Config Overrides
+                if let Some(local_config) = get_group_config(item) {
+                    if let Some(local_general) = local_config.general {
+                        if let Some(local_strategy) = local_general.selection_strategy {
+                            current_strategy = local_strategy;
+                            debug!("Using Group specific Config overrides");
+                        }
                     }
                 }
-
-                selected_item = wallpaper::select_wallpaper_item(item, extensions);
             }
         }
 
@@ -156,7 +150,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .bright_green()
             );
         } else if item_size > 1 {
-            match config_group_selection {
+            match current_strategy {
                 GroupSelectionStrategy::Spread => {
                     let total_items = selected_item.len();
                     let max_spread_items = interval as usize;
