@@ -37,8 +37,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // SETUP: Config Variables
     let wallpaper_dir = config.directories.wallpaper.as_str();
-    // Don't worry, JFK won't get executed here because defaults come from config
-    let special_dir = config.directories.special.as_deref().unwrap_or(&"JFK");
+    let mut special_dir = String::new();
+    match config.directories.special {
+        Some(dir) => special_dir = dir.as_str().to_string(),
+        None => (), // Defaults are set in config initialization
+    }
     let config_special_entries = config.special_entries;
     let config_special_enabled = config.general.enable_special;
     let config_group_strategy = config.general.group_selection_strategy;
@@ -82,7 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // COLLECTION: Special Collection
         if selected_item.is_empty() && config_special_enabled {
-            match wallpaper::get_special_items(special_dir, extensions) {
+            match wallpaper::get_special_items(&special_dir, extensions) {
                 Ok(special_items) => {
                     if let Some(filename) = config_special_entries.get(&hour.to_string()) {
                         if let Some(item) = special_items.get(filename) {
