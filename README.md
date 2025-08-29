@@ -317,4 +317,6 @@ And just like that, your system gently drifts into dreamland with you 🌙
 
 ## 📜 License
 
-Expression is licensed under the **GNU Affero GPL v3**, ensuring all modifications and server-hosted versions remain open-source.
+This project is licensed under the **GNU General Public License v3.0** (GPL v3.0) - see the [LICENSE](LICENSE) file for details.
+
+This ensures that all modifications and derivative works remain open-source and available to the community.
