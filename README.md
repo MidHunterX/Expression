@@ -46,22 +46,17 @@ git clone https://github.com/MidHunterX/Expression.git
 cd Expression
 ```
 
-Build the project
-
-```sh
-cargo build --release
-```
-
 Create config directory if it doesn't exist
 
 ```sh
 mkdir -p ~/.config/expression
 ```
 
-Copy the binary to your local/global bin directory. Be sure to have `~/.local/bin` in your PATH environment variable if you are doing the following command.
+Compile and Install
 
 ```sh
-cp target/release/expression ~/.local/bin/
+cargo build --release
+sudo cp target/release/expression /usr/local/bin/
 ```
 
 #### Step 2: Configure
