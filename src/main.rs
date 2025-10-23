@@ -220,6 +220,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         selected_item.clear();
 
+        // EXECUTE SCRIPT
+        if exec_cmd.is_some() {
+            let result = cmd::execute(exec_cmd.as_ref().unwrap());
+            match result {
+                Ok(_) => {}
+                Err(err) => error!("Error executing command: {}", err),
+            }
+        }
+
         // CHECK: wait time discrepancies
         let full_wait_secs = (now.minute() * 60 + now.second()) + wait_seconds as u32;
         let expected_secs = (interval * 60.0).ceil() as u32;
@@ -237,15 +246,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match refresh_strategy {
             WaitStrategy::Sleep => calc::sleep(wait_seconds),
             WaitStrategy::Refresh => calc::refresh(interval, now, wait_seconds),
-        }
-
-        // EXECUTE SCRIPT
-        if exec_cmd.is_some() {
-            let result = cmd::execute(exec_cmd.as_ref().unwrap());
-            match result {
-                Ok(_) => {}
-                Err(err) => error!("Error executing command: {}", err),
-            }
         }
     }
     Ok(())
