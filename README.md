@@ -2,9 +2,11 @@
 
 # Expression
 
-Expression is a highly customizable, time-aware wallpaper engine for Linux. It allows you to automate desktop wallpaper changes based on the current hour, randomly or evenly spread wallpapers from grouped directories, and define overrides for special times like sleep, lunch, or focus hours. Whether you want a subtle visual timetable or an expressive ambience that changes with your day, Expression makes your desktop emotionally intelligent.
+Want to set specific wallpapers based on a time table to notify you what time it is? Or maybe a personal motivational wallpaper strategically timed at the start of work hour to remind you of what you can do? Then this app is the right addition for your desktop.
 
-> "This is the best 24-hour automatic wallpaper setter you could've ever asked for." - sis
+Expression is a highly customizable, time-aware wallpaper engine for Linux. It allows you to automate desktop wallpaper changes based on the current hour, randomly or evenly spread wallpapers from grouped directories, and define overrides for special times like sleep, lunch, or focus hours. Whether you want a subtle visual timetable or an expressive ambience that changes with your day. Make your desktop emotionally intelligent.
+
+> "This is the best 24-hour wallpaper setter \*takes breath\* I could've ever asked for." - Step Sis
 
 ## ⛲ Features
 
@@ -239,6 +241,8 @@ wallpapers/
 │   └── Tiananmen Square.jpg
 ├── 03/
 │   └── who_is_in_paris.jpg
+├── 04/
+│   └── where_did_the_towers_go.jpg
 ...
 ```
 
@@ -304,7 +308,7 @@ selection_strategy = "spread"  # Applies spread strategy to the group only
 
 ```toml
 [special_entries]
-13 = "eating_ramyeon"
+13 = "eating_ramyeon" # 라면 먹고 갈래?
 23 = "sleep_time"
 ```
 
