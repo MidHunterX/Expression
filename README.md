@@ -6,8 +6,6 @@ Want to set specific wallpapers based on a time table to notify you what time it
 
 Expression is a highly customizable, time-aware wallpaper engine for Linux. It allows you to automate desktop wallpaper changes based on the current hour, randomly or evenly spread wallpapers from grouped directories, and define overrides for special times like sleep, lunch, or focus hours. Whether you want a subtle visual timetable or an expressive ambience that changes with your day. Make your desktop emotionally intelligent.
 
-> "This is the best 24-hour wallpaper setter \*takes breath\* I could've ever asked for." - Step Sis
-
 ## ⛲ Features
 
 ### Main Features
@@ -313,6 +311,10 @@ selection_strategy = "spread"  # Applies spread strategy to the group only
 ```
 
 And just like that, your system gently drifts into dreamland with you 🌙
+
+## 📌 Testimonials
+
+> "This is the best 24-hour wallpaper setter \*takes breath\* I could've ever asked for." - Step Sis
 
 ## 📜 License
 
